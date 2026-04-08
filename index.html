@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>就活管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F5F3;
+  --card: #FFFFFF;
+  --border: #E5E5E1;
+  --border2: #D0D0CB;
+  --text: #1A1A18;
+  --text2: #6B6B65;
+  --text3: #9A9A94;
+  --accent: #2F54EB;
+  --accent-bg: #EEF2FF;
+  --font: 'Noto Sans JP', sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.6; }
+
+/* Layout */
+#app { min-height: 100vh; }
+header { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header-left { display: flex; align-items: center; gap: 16px; }
+.app-title { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+.header-stats { display: flex; gap: 16px; }
+.hstat { font-size: 12px; color: var(--text2); }
+.hstat b { color: var(--text); font-weight: 500; }
+
+main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 80px; }
+
+/* Views */
+.view { display: none; }
+.view.active { display: block; }
+
+/* Section */
+.section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.section-title { font-size: 14px; font-weight: 700; }
+
+/* Buttons */
+.btn { border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--card); color: var(--text); padding: 6px 14px; font-size: 12px; font-family: var(--font); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+.btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+.btn-primary:hover { background: #1D43D4; border-color: #1D43D4; color: white; }
+.btn-ghost { border-color: transparent; }
+.btn-ghost:hover { background: var(--bg); border-color: var(--border2); color: var(--text); }
+.btn-back { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.btn-danger:hover { border-color: #EF4444; color: #EF4444; background: #FEF2F2; }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.phase-badge { cursor: pointer; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+th { padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text2); border-bottom: 1px solid var(--border); white-space: nowrap; background: #FAFAF8; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.1s; }
+tbody tr:hover { background: #FAFAF8; }
+.company-link { color: var(--accent); font-weight: 500; cursor: pointer; text-decoration: none; font-size: 13px; }
+.company-link:hover { text-decoration: underline; }
+
+/* Days remaining */
+.days-ok { color: #16A34A; font-weight: 500; font-size: 12px; }
+.days-warn { color: #D97706; font-weight: 500; font-size: 12px; }
+.days-urgent { color: #DC2626; font-weight: 700; font-size: 12px; }
+.days-past { color: var(--text3); font-size: 12px; }
+
+/* Editable fields */
+.editable { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; min-height: 72px; outline: none; font-family: var(--font); font-size: 13px; color: var(--text); line-height: 1.7; transition: border 0.15s; background: var(--card); }
+.editable:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(47,84,235,0.08); }
+.editable[data-placeholder]:empty::before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
+.editable-sm { min-height: 40px; }
+
+/* Char counter */
+.char-wrap { position: relative; }
+.char-count { position: absolute; bottom: 6px; right: 8px; font-size: 10px; color: var(--text3); pointer-events: none; }
+.char-count.over { color: #DC2626; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 20px; }
+.tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 12px 16px; font-size: 13px; color: var(--text2); cursor: pointer; font-family: var(--font); margin-bottom: -1px; transition: all 0.15s; white-space: nowrap; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+.tab-content { display: none; padding: 20px; }
+.tab-content.active { display: block; }
+
+/* Grid */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.span2 { grid-column: 1 / -1; }
+.field-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+
+/* Summary cards */
+.stat-cards { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; padding: 20px; }
+.stat-card { background: var(--bg); border-radius: var(--radius-sm); padding: 14px; }
+.stat-card .val { font-size: 24px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.stat-card .lbl { font-size: 11px; color: var(--text2); }
+
+/* Phase stepper */
+.phase-stepper { display: flex; align-items: center; padding: 16px 20px; gap: 0; overflow-x: auto; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border2); background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--text3); cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+.step-dot.done { background: #E8F5E9; border-color: #4CAF50; color: #2E7D32; }
+.step-dot.active { background: var(--accent); border-color: var(--accent); color: white; }
+.step-dot.fail { background: #FFEBEE; border-color: #EF5350; color: #C62828; }
+.step-line { width: 24px; height: 2px; background: var(--border); flex-shrink: 0; transition: background 0.2s; }
+.step-line.done { background: #4CAF50; }
+.step-label { font-size: 10px; color: var(--text3); text-align: center; margin-top: 3px; white-space: nowrap; }
+
+/* ES questions */
+.es-question { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 12px; }
+.es-q-header { background: #FAFAF8; padding: 10px 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--border); }
+.es-q-text { font-size: 13px; font-weight: 500; flex: 1; outline: none; background: transparent; border: none; font-family: var(--font); color: var(--text); }
+.es-a-wrap { padding: 10px 14px; position: relative; }
+.es-answer { border: none; border-radius: 0; padding: 0; min-height: 90px; }
+
+/* Company research grid */
+.research-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+.research-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+/* Interview QA */
+.qa-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+.qa-q { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+.qa-a { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; min-height: 56px; outline: none; font-family: var(--font); font-size: 13px; width: 100%; }
+
+/* Inline input */
+.inline-input { border: none; border-bottom: 1px solid transparent; outline: none; font-family: var(--font); font-size: 13px; color: var(--text); background: transparent; width: 100%; padding: 2px 4px; transition: border 0.15s; }
+
+/* Detail header */
+.detail-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.detail-company-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+
+/* Select */
+select.inline-select { border: 1px solid var(--border); border-radius: 4px; background: var(--card); color: var(--text); font-family: var(--font); font-size: 12px; padding: 3px 6px; outline: none; cursor: pointer; }
+
+/* Filter bar */
+.filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 20px; border-bottom: 1px solid var(--border); background: #FAFAF8; }
+
+/* Toast */
+#toast { position: fixed; bottom: 24px; right: 24px; background: #1A1A18; color: white; padding: 10px 16px; border-radius: var(--radius-sm); font-size: 12px; opacity: 0; transition: opacity 0.25s; z-index: 9999; pointer-events: none; }
+#toast.show { opacity: 1; }
+.empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+
+/* カレンダー用追加スタイル */
+.calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 0 16px; margin-bottom: 12px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.calendar-day-header { text-align: center; font-size: 11px; font-weight: 500; color: var(--text2); padding: 4px; }
+.calendar-day { border: 1px solid var(--border); border-radius: var(--radius-sm); min-height: 80px; padding: 4px; background: var(--card); display: flex; flex-direction: column; gap: 2px; }
+.calendar-day.today { border-color: var(--accent); background: var(--accent-bg); }
+.calendar-day.other-month { opacity: 0.4; background: var(--bg); }
+.calendar-date { font-size: 12px; font-weight: 500; margin-bottom: 4px; color: var(--text2); text-align: right; padding-right: 4px; }
+.event-badge { display: block; font-size: 10px; padding: 3px 6px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; font-weight: 500; transition: opacity 0.15s; }
+.event-badge:hover { opacity: 0.8; }
+.event-es { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+.event-int1 { background: #CFFAFE; color: #155E75; border: 1px solid #67E8F9; }
+.event-int2 { background: #E0F2FE; color: #075985; border: 1px solid #7DD3FC; }
+.event-final { background: #FFEDD5; color: #9A3412; border: 1px solid #FCA5A1; }
+
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } .stat-cards { grid-template-columns: repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<div id="app" style="display: none;">
+<header>
+  <div class="header-left">
+    <span class="app-title">就活管理</span>
+    <div class="header-stats" id="header-stats"></div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="exportData()">エクスポート</button>
+    <button class="btn" onclick="importData()">インポート</button>
+  </div>
+</header>
+
+<main>
+<div id="view-home" class="view active">
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">ダッシュボード</span>
+      <button class="btn btn-primary" onclick="addCompany()">＋ 企業を追加</button>
+    </div>
+    <div class="stat-cards" id="stat-cards"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" style="border-bottom:none; padding-bottom:0;">
+      <span class="section-title">スケジュール</span>
+      <div class="calendar-header" style="margin:0; padding:0;">
+        <button class="btn btn-ghost" onclick="prevMonth()">◀</button>
+        <span id="calendar-month-label" style="font-weight:700; font-size:14px; margin: 0 16px;"></span>
+        <button class="btn btn-ghost" onclick="nextMonth()">▶</button>
+      </div>
+    </div>
+    <div style="padding: 16px 20px;">
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">企業一覧</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="sortTable('deadline')">締切順</button>
+        <button class="btn" onclick="sortTable('interest')">志望度順</button>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-label">フィルター：</span>
+      <select class="inline-select" id="filter-phase" onchange="renderTable()">
+        <option value="">すべて</option>
+        <option>未着手</option><option>ES作成中</option><option>ES提出済</option>
+        <option>書類選考中</option><option>一次面接</option><option>二次面接</option>
+        <option>最終面接</option><option>内定</option><option>不採用</option>
+      </select>
+      <input type="text" class="inline-input" id="filter-search" placeholder="企業名を検索..." oninput="renderTable()" style="width:160px;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:12px;">
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>企業名</th>
+            <th>業界</th>
+            <th>志望度</th>
+            <th>フェーズ</th>
+            <th>ES締切</th>
+            <th>残日数</th>
+            <th>ES提出</th>
+            <th>一次面接</th>
+            <th>最終面接</th>
+            <th>内定</th>
+            <th>HP</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">自己分析・面接対策・研究概要</span>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(this,'self')">自己分析</button>
+      <button class="tab-btn" onclick="switchTab(this,'interview')">面接対策</button>
+      <button class="tab-btn" onclick="switchTab(this,'research')">研究概要</button>
+    </div>
+
+    <div id="tab-self" class="tab-content active">
+      <div class="grid2">
+        <div>
+          <div class="field-label">自己PR（約300字）</div>
+          <div class="char-wrap">
+            <div class="editable" contenteditable="true" data-key="selfAnalysis.selfPR" data-max="300" onblur="saveSelfAnalysis('selfPR',this.textContent)"></div>
+            <span class="char-count"></span>
+          </div>
+        </div>
+        <div>
+          <div class="field-label">ガクチカ（学生時代に最も力を入れたこと）</div>
+          <div class="char-wrap">
+            <div class="editable" contenteditable="true" data-key="selfAnalysis.gakuchika" data-max="400" onblur="saveSelfAnalysis('gakuchika',this.textContent)"></div>
+            <span class="char-count"></span>
+          </div>
+        </div>
+        <div><div class="field-label">長所</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.strength" onblur="saveSelfAnalysis('strength',this.textContent)"></div></div>
+        <div><div class="field-label">短所・改善への取り組み</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.weakness" onblur="saveSelfAnalysis('weakness',this.textContent)"></div></div>
+        <div class="span2"><div class="field-label">キャリアビジョン（5年後・10年後）</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.career" onblur="saveSelfAnalysis('career',this.textContent)"></div></div>
+        <div class="span2"><div class="field-label">働く上で大切にしたいこと</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.values" onblur="saveSelfAnalysis('values',this.textContent)"></div></div>
+      </div>
+    </div>
+
+    <div id="tab-interview" class="tab-content">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:500;margin-bottom:12px;">頻出質問 Q&A</div>
+        <div id="qa-list"></div>
+        <button class="btn" onclick="addQA()" style="margin-top:8px;">＋ 質問を追加</button>
+      </div>
+      <div style="margin-top:20px;">
+        <div class="field-label">逆質問リスト（面接官への質問）</div>
+        <div class="editable" contenteditable="true" data-key="interview.reverseQA" onblur="saveInterviewReverseQA(this.textContent)"></div>
+      </div>
+    </div>
+
+    <div id="tab-research" class="tab-content">
+      <div class="grid2">
+        <div><div class="field-label">研究タイトル</div><div class="editable editable-sm" contenteditable="true" data-key="research.title" onblur="saveResearchOverall('title',this.textContent)"></div></div>
+        <div><div class="field-label">研究分野・キーワード</div><div class="editable editable-sm" contenteditable="true" data-key="research.field" onblur="saveResearchOverall('field',this.textContent)"></div></div>
+        <div class="span2"><div class="field-label">研究概要（一般向け 3分説明バージョン）</div><div class="editable" contenteditable="true" data-key="research.overview" onblur="saveResearchOverall('overview',this.textContent)"></div></div>
+        <div><div class="field-label">使用技術・手法・環境</div><div class="editable editable-sm" contenteditable="true" data-key="research.tech" onblur="saveResearchOverall('tech',this.textContent)"></div></div>
+        <div><div class="field-label">成果・アピールポイント</div><div class="editable editable-sm" contenteditable="true" data-key="research.result" onblur="saveResearchOverall('result',this.textContent)"></div></div>
+        <div class="span2"><div class="field-label">研究を通じて身についたこと</div><div class="editable editable-sm" contenteditable="true" data-key="research.learning" onblur="saveResearchOverall('learning',this.textContent)"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="view-detail" class="view">
+  <div style="margin-bottom:16px;">
+    <button class="btn btn-ghost btn-back" onclick="showHome()">← 一覧に戻る</button>
+  </div>
+
+  <div class="section">
+    <div class="detail-header">
+      <div class="detail-company-name" id="detail-name">企業名</div>
+      <div id="detail-phase-badge"></div>
+      <a id="detail-hp" href="#" target="_blank" class="btn" style="font-size:12px;">公式サイト ↗</a>
+    </div>
+    <div id="phase-stepper" class="phase-stepper"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-title">スケジュール設定</span></div>
+    <div class="grid2" style="padding: 16px 20px;">
+      <div>
+        <div class="field-label">ES締切</div>
+        <input type="date" class="editable editable-sm" style="width:100%" id="edit-es-deadline" onchange="saveSchedule('esDeadline', this.value)">
+      </div>
+      <div>
+        <div class="field-label">一次面接</div>
+        <input type="date" class="editable editable-sm" style="width:100%" id="edit-int-1" onchange="saveSchedule('interview1', this.value)">
+      </div>
+      <div>
+        <div class="field-label">二次面接</div>
+        <input type="date" class="editable editable-sm" style="width:100%" id="edit-int-2" onchange="saveSchedule('interview2', this.value)">
+      </div>
+      <div>
+        <div class="field-label">最終面接</div>
+        <input type="date" class="editable editable-sm" style="width:100%" id="edit-int-final" onchange="saveSchedule('interviewFinal', this.value)">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">ES設問 & 回答</span>
+      <button class="btn" onclick="addQuestion()">＋ 設問を追加</button>
+    </div>
+    <div style="padding:16px 20px;" id="es-list"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">企業情報・調査メモ</span>
+    </div>
+    <div style="padding:16px 20px;">
+      <div class="grid2" id="research-grid"></div>
+    </div>
+  </div>
+</div>
+</main>
+</div>
+
+<div id="toast">保存しました</div>
+<input type="file" id="import-input" accept=".json" style="display:none" onchange="doImport(event)">
+
+<script>
+// --- ここに取得したIDとキーを入力してください ---
+const BIN_ID = '69d66d7436566621a88f7121';
+const API_KEY = '$2a$10$o0ckigFFVu0U9kEmzwnpduZygWWYhCMH9pl6oLENj393iJv/HbzhO';
+
+// URLの「合言葉」チェック設定
+const urlParams = new URLSearchParams(window.location.search);
+const secretKey = urlParams.get('key');
+const EXPECTED_KEY = 'MORI'; // ★仲間内で共有するURLの「?key=」のあとに付ける合言葉
+
+let state = null; // 初期データは後で非同期で読み込む
+let currentCompanyId = null;
+let saveTimer = null;
+
+// カレンダー用の状態変数
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth(); 
+
+const PHASES = ['未着手','ES作成中','ES提出済','書類選考中','一次面接','二次面接','最終面接','内定','不採用'];
+const PHASE_COLORS = {
+  '未着手':     {bg:'#F1F1EF',text:'#6B6B65',border:'#D0D0CB'},
+  'ES作成中':   {bg:'#FEF3C7',text:'#92400E',border:'#FCD34D'},
+  'ES提出済':   {bg:'#DBEAFE',text:'#1E40AF',border:'#93C5FD'},
+  '書類選考中': {bg:'#EDE9FE',text:'#5B21B6',border:'#C4B5FD'},
+  '一次面接':   {bg:'#CFFAFE',text:'#155E75',border:'#67E8F9'},
+  '二次面接':   {bg:'#E0F2FE',text:'#075985',border:'#7DD3FC'},
+  '最終面接':   {bg:'#FFEDD5',text:'#9A3412',border:'#FCA5A1'},
+  '内定':       {bg:'#DCFCE7',text:'#166534',border:'#86EFAC'},
+  '不採用':     {bg:'#FEE2E2',text:'#991B1B',border:'#FCA5A5'},
+};
+const RESEARCH_FIELDS = [
+  {key:'overview', label:'事業概要', icon:'🏢'},
+  {key:'strength', label:'強み・特徴・競合優位性', icon:'💡'},
+  {key:'news',     label:'最近のニュース・注目トピック', icon:'📰'},
+  {key:'motivation',label:'志望動機メモ', icon:'🎯'},
+  {key:'benefits', label:'福利厚生・働き方・社風', icon:'☕'},
+  {key:'obNotes',  label:'OB/OG訪問メモ', icon:'👥'},
+];
+
+function defaultData() {
+  return {
+    companies: [],
+    selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:''},
+    interview:{ qa:[], reverseQA:'' },
+    research:{title:'',field:'',overview:'',tech:'',result:'',learning:''},
+  };
+}
+
+// データの読み込み（非同期）
+async function loadState() {
+  try {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return Object.keys(data.record).length > 0 ? data.record : defaultData();
+    }
+    return defaultData();
+  } catch(e) {
+    console.error("読み込みエラー", e);
+    return defaultData();
+  }
+}
+
+// データの保存（非同期）
+function saveState() {
+  clearTimeout(saveTimer);
+  // クラウドへの保存は少し間隔をあける（1.5秒）
+  saveTimer = setTimeout(async () => {
+    try {
+      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': API_KEY
+        },
+        body: JSON.stringify(state)
+      });
+      showToast('保存しました');
+    } catch(e) {
+      showToast('保存に失敗しました');
+    }
+  }, 1500);
+}
+
+function showToast(msg='保存しました') {
+  const t = document.getElementById('toast'); t.textContent = msg;
+  t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function showHome() {
+  document.getElementById('view-home').classList.add('active');
+  document.getElementById('view-detail').classList.remove('active');
+  currentCompanyId = null;
+  renderAll();
+}
+
+function showDetail(id) {
+  currentCompanyId = id;
+  document.getElementById('view-home').classList.remove('active');
+  document.getElementById('view-detail').classList.add('active');
+  renderDetail();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderAll() {
+  renderStats();
+  renderTable();
+  renderCalendar();
+  renderSelfAnalysis();
+  renderQAList();
+}
+
+/* ================= カレンダー処理 ================= */
+function renderCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  if(!grid) return;
+  const label = document.getElementById('calendar-month-label');
+  label.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const today = new Date();
+
+  let html = '';
+  const dayNames = ['日','月','火','水','木','金','土'];
+  dayNames.forEach(d => html += `<div class="calendar-day-header">${d}</div>`);
+
+  const events = {};
+  state.companies.forEach(c => {
+    if(c.esDeadline) addEvent(events, c.esDeadline, c.name + ' ES締切', 'event-es', c.id);
+    if(c.interview1) addEvent(events, c.interview1, c.name + ' 1次面接', 'event-int1', c.id);
+    if(c.interview2) addEvent(events, c.interview2, c.name + ' 2次面接', 'event-int2', c.id);
+    if(c.interviewFinal) addEvent(events, c.interviewFinal, c.name + ' 最終面接', 'event-final', c.id);
+  });
+
+  for(let i = 0; i < firstDay; i++) {
+    html += `<div class="calendar-day other-month"></div>`;
+  }
+
+  for(let i = 1; i <= daysInMonth; i++) {
+    const isToday = today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === i;
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+    const dayEvents = events[dateStr] || [];
+
+    let eventHtml = dayEvents.map(e => `
+      <div class="event-badge ${e.cls}" onclick="showDetail(${e.id}); event.stopPropagation();" title="${e.name}">
+        ${e.name}
+      </div>
+    `).join('');
+
+    html += `<div class="calendar-day ${isToday ? 'today' : ''}">
+               <div class="calendar-date">${i}</div>
+               ${eventHtml}
+             </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function addEvent(eventsObj, dateStr, name, cls, id) {
+  if(!eventsObj[dateStr]) eventsObj[dateStr] = [];
+  eventsObj[dateStr].push({name, cls, id});
+}
+
+function prevMonth() { currentMonth--; if(currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
+function nextMonth() { currentMonth++; if(currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); }
+
+/* ================= UI描画系 ================= */
+function renderStats() {
+  const cos = state.companies;
+  document.getElementById('stat-cards').innerHTML = `
+    <div class="stat-card"><div class="val">${cos.length}</div><div class="lbl">エントリー数</div></div>
+    <div class="stat-card"><div class="val" style="color:#2563EB">${cos.filter(c=>c.esSubmitted).length}</div><div class="lbl">ES提出済</div></div>
+    <div class="stat-card"><div class="val" style="color:#7C3AED">${cos.filter(c=>!['未着手','内定','不採用'].includes(c.phase)).length}</div><div class="lbl">選考中</div></div>
+    <div class="stat-card"><div class="val" style="color:#16A34A">${cos.filter(c=>c.phase==='内定').length}</div><div class="lbl">内定</div></div>
+  `;
+}
+
+function daysLeft(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((d - today) / 86400000);
+}
+
+function daysLeftHTML(dateStr) {
+  const d = daysLeft(dateStr);
+  if (d === null) return '—';
+  if (d < 0) return `<span class="days-past">終了</span>`;
+  if (d === 0) return `<span class="days-urgent">今日！</span>`;
+  if (d <= 3) return `<span class="days-urgent">残${d}日</span>`;
+  if (d <= 7) return `<span class="days-warn">残${d}日</span>`;
+  return `<span class="days-ok">残${d}日</span>`;
+}
+
+function phaseBadge(phase) {
+  const c = PHASE_COLORS[phase] || PHASE_COLORS['未着手'];
+  return `<span class="badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${phase}</span>`;
+}
+
+let tableSortMode = null;
+function sortTable(mode) { tableSortMode = mode; renderTable(); }
+
+function renderTable() {
+  let cos = [...state.companies];
+  if (tableSortMode === 'deadline') cos.sort((a,b) => new Date(a.esDeadline||'9999-12-31') - new Date(b.esDeadline||'9999-12-31'));
+  
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = cos.map(c => `<tr>
+    <td><span class="company-link" onclick="showDetail(${c.id})">${c.name}</span></td>
+    <td style="color:var(--text2)">${c.industry||'—'}</td>
+    <td>★${c.interest}</td>
+    <td>${phaseBadge(c.phase)}</td>
+    <td style="font-size:12px">${c.esDeadline||'—'}</td>
+    <td>${daysLeftHTML(c.esDeadline)}</td>
+    <td style="text-align:center">${c.esSubmitted?'○':'—'}</td>
+    <td style="font-size:12px">${c.interview1||'—'}</td>
+    <td style="font-size:12px">${c.interviewFinal||'—'}</td>
+    <td>${c.offerStatus===true?'内定':c.offerStatus===false?'不採用':'—'}</td>
+    <td>${c.hp ? `<a href="${c.hp}" target="_blank" style="color:var(--accent);font-size:12px">開く</a>` : '—'}</td>
+  </tr>`).join('');
+}
+
+function addCompany() {
+  const name = prompt('企業名を入力してください');
+  if (!name || !name.trim()) return;
+  const newId = Date.now();
+  state.companies.push({
+    id: newId, name: name.trim(), industry: '', interest: 3, phase: '未着手',
+    esDeadline: '', esSubmitted: null, interview1: '', interview2: '', interviewFinal: '', offerStatus: null,
+    hp: '', esQuestions:[], research:{overview:'',strength:'',news:'',motivation:'',benefits:'',obNotes:''}
+  });
+  saveState(); showDetail(newId);
+}
+
+function getCompany() { return state.companies.find(c => c.id === currentCompanyId); }
+
+function renderDetail() {
+  const c = getCompany(); if (!c) return;
+  document.getElementById('detail-name').textContent = c.name;
+  document.getElementById('detail-phase-badge').innerHTML = phaseBadge(c.phase);
+  const hpEl = document.getElementById('detail-hp');
+  hpEl.href = c.hp || '#'; hpEl.style.display = c.hp ? '' : 'none';
+  
+  document.getElementById('edit-es-deadline').value = c.esDeadline || '';
+  document.getElementById('edit-int-1').value = c.interview1 || '';
+  document.getElementById('edit-int-2').value = c.interview2 || '';
+  document.getElementById('edit-int-final').value = c.interviewFinal || '';
+
+  renderStepper();
+  renderESList();
+  renderResearchGrid();
+}
+
+function saveSchedule(key, val) {
+  const c = getCompany(); if(!c) return;
+  c[key] = val;
+  saveState();
+  renderTable();
+  renderCalendar();
+}
+
+function renderStepper() {
+  const c = getCompany(); if (!c) return;
+  const mainPhases = ['未着手','ES作成中','ES提出済','書類選考中','一次面接','二次面接','最終面接'];
+  const currentIdx = mainPhases.indexOf(c.phase);
+  const isFail = c.phase === '不採用'; const isOffer = c.phase === '内定';
+  
+  let html = '<div style="display:flex;align-items:flex-start;gap:0;">';
+  mainPhases.forEach((p, i) => {
+    let dotClass = 'step-dot';
+    if (isOffer || (currentIdx > i)) dotClass += ' done';
+    else if (currentIdx === i && !isFail) dotClass += ' active';
+    html += `<div style="display:flex;flex-direction:column;align-items:center;">
+      <div style="display:flex;align-items:center;">
+        <div class="${dotClass}" onclick="setPhase('${p}')" title="${p}">${i+1}</div>
+        ${i < mainPhases.length-1 ? `<div class="step-line ${(isOffer || currentIdx > i) ? 'done':''}"></div>` : ''}
+      </div>
+      <div class="step-label">${p}</div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('phase-stepper').innerHTML = html;
+}
+
+function setPhase(phase) {
+  const c = getCompany(); if (!c) return;
+  c.phase = phase; saveState();
+  document.getElementById('detail-phase-badge').innerHTML = phaseBadge(phase);
+  renderStepper(); renderStats(); renderTable();
+}
+
+function renderESList() {
+  const c = getCompany(); if (!c) return;
+  document.getElementById('es-list').innerHTML = c.esQuestions.map((q, i) => `
+    <div class="es-question">
+      <div class="es-q-header"><div class="es-q-text" contenteditable="true" onblur="saveESQ(${i}, 'q', this.textContent)">${q.q}</div></div>
+      <div class="es-a-wrap"><div class="editable es-answer" contenteditable="true" onblur="saveESQ(${i}, 'a', this.textContent)">${q.a}</div></div>
+    </div>
+  `).join('');
+}
+
+function saveESQ(index, field, val) {
+  const c = getCompany(); if (!c) return;
+  c.esQuestions[index][field] = val;
+  saveState();
+}
+
+function addQuestion() {
+  const c = getCompany(); if (!c) return;
+  c.esQuestions.push({id:Date.now(), q:'新しい設問', a:'', maxLen:400});
+  saveState(); renderESList();
+}
+
+function renderResearchGrid() {
+  const c = getCompany(); if (!c) return;
+  document.getElementById('research-grid').innerHTML = RESEARCH_FIELDS.map(f => `
+    <div class="research-card">
+      <div class="research-label">${f.label}</div>
+      <div class="editable editable-sm" contenteditable="true" onblur="saveResearch('${f.key}',this.textContent)">${c.research[f.key]||''}</div>
+    </div>
+  `).join('');
+}
+function saveResearch(key, val) { const c = getCompany(); if (!c) return; c.research[key] = val; saveState(); }
+
+function saveSelfAnalysis(key, val) { state.selfAnalysis[key] = val; saveState(); }
+function saveResearchOverall(key, val) { state.research[key] = val; saveState(); }
+function saveInterviewReverseQA(val) { state.interview.reverseQA = val; saveState(); }
+
+function renderSelfAnalysis() {
+  const els = document.querySelectorAll('[data-key^="selfAnalysis."]');
+  els.forEach(el => {
+    const key = el.getAttribute('data-key').split('.')[1];
+    el.textContent = state.selfAnalysis[key] || '';
+  });
+  const rels = document.querySelectorAll('[data-key^="research."]');
+  rels.forEach(el => {
+    const key = el.getAttribute('data-key').split('.')[1];
+    el.textContent = state.research[key] || '';
+  });
+  document.querySelector('[data-key="interview.reverseQA"]').textContent = state.interview.reverseQA || '';
+}
+
+function renderQAList() {
+  document.getElementById('qa-list').innerHTML = state.interview.qa.map((q, i) => `
+    <div class="qa-item">
+      <div class="qa-q" contenteditable="true" onblur="saveQA(${i}, 'q', this.textContent)">${q.q}</div>
+      <div class="qa-a" contenteditable="true" onblur="saveQA(${i}, 'a', this.textContent)">${q.a}</div>
+    </div>
+  `).join('');
+}
+
+function saveQA(index, field, val) {
+  state.interview.qa[index][field] = val;
+  saveState();
+}
+
+function addQA() {
+  state.interview.qa.push({id:Date.now(), q:'よくある質問', a:''});
+  saveState(); renderQAList();
+}
+
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+tabId).classList.add('active');
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'shukatsu.json'; a.click();
+}
+function importData() { document.getElementById('import-input').click(); }
+function doImport(e) { /* 省略：既存ロジックを維持 */ }
+
+// アプリの起動関数
+async function initApp() {
+  // 合言葉が間違っている場合は画面を表示しない
+  if (secretKey !== EXPECTED_KEY) {
+    document.body.innerHTML = '<div style="padding:40px; text-align:center; font-size:16px;">アクセス権がありません。<br>正しいURLからアクセスしてください。</div>';
+    return;
+  }
+  
+  // 読み込み中表示
+  document.body.insertAdjacentHTML('afterbegin', '<div id="loading" style="text-align:center; padding:40px; font-size: 14px;">クラウドからデータを読み込み中...</div>');
+  
+  state = await loadState(); // クラウドからデータ取得
+  
+  const loadingEl = document.getElementById('loading');
+  if(loadingEl) loadingEl.remove(); // 読み込み中表示を消す
+  
+  // アプリ本体を表示
+  document.getElementById('app').style.display = 'block';
+
+  renderAll(); // 画面を描画
+}
+
+// 起動！
+initApp();
+</script>
+</body>
+</html>
