@@ -382,13 +382,13 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="doImport(event)">
 
 <script>
-// --- 【重要】ここにご自身のIDとキーを再度入力してください ---
-const BIN_ID = 'あなたの_BIN_IDをここに入力';
-const API_KEY = 'あなたの_API_KEYをここに入力';
-
-// URLの「合言葉」チェック設定
+// --- ここに取得したIDとキーを入力してください ---
 const BIN_ID = '69d66d7436566621a88f7121';
 const API_KEY = '$2a$10$o0ckigFFVu0U9kEmzwnpduZygWWYhCMH9pl6oLENj393iJv/HbzhO';
+
+// URLの「合言葉」チェック設定
+const urlParams = new URLSearchParams(window.location.search);
+const secretKey = urlParams.get('key');
 const EXPECTED_KEY = 'MORI'; // ★仲間内で共有するURLの「?key=」のあとに付ける合言葉
 
 let state = null; // 初期データは後で非同期で読み込む
