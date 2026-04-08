@@ -118,13 +118,6 @@ tbody tr:hover { background: #FAFAF8; }
 .step-line.done { background: #4CAF50; }
 .step-label { font-size: 10px; color: var(--text3); text-align: center; margin-top: 3px; white-space: nowrap; }
 
-/* ES questions */
-.es-question { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 12px; }
-.es-q-header { background: #FAFAF8; padding: 10px 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--border); }
-.es-q-text { font-size: 13px; font-weight: 500; flex: 1; outline: none; background: transparent; border: none; font-family: var(--font); color: var(--text); }
-.es-a-wrap { padding: 10px 14px; position: relative; }
-.es-answer { border: none; border-radius: 0; padding: 0; min-height: 90px; }
-
 /* Company research grid */
 .research-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
 .research-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
@@ -392,11 +385,10 @@ const urlParams = new URLSearchParams(window.location.search);
 const secretKey = urlParams.get('key');
 const EXPECTED_KEY = 'MORI'; // ★仲間内で共有するURLの「?key=」のあとに付ける合言葉
 
-let state = null; // 初期データは後で非同期で読み込む
+let state = null;
 let currentCompanyId = null;
 let saveTimer = null;
 
-// カレンダー用の状態変数
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth(); 
 
@@ -430,7 +422,6 @@ function defaultData() {
   };
 }
 
-// データの読み込み（非同期）
 async function loadState() {
   try {
     const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -447,7 +438,6 @@ async function loadState() {
   }
 }
 
-// データの保存（非同期）
 function saveState() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
@@ -495,7 +485,6 @@ function renderAll() {
   renderQAList();
 }
 
-/* ================= カレンダー処理 ================= */
 function renderCalendar() {
   const grid = document.getElementById('calendar-grid');
   if(!grid) return;
@@ -549,18 +538,12 @@ function addEvent(eventsObj, dateStr, name, cls, id) {
 function prevMonth() { currentMonth--; if(currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
 function nextMonth() { currentMonth++; if(currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); }
 
-/* ================= UI描画系（連動機能追加） ================= */
 function renderStats() {
   const cos = state.companies;
-  
-  // ダッシュボードの集計（フェーズと自動連動）
   const entryCount = cos.length;
-  // フェーズが「ES提出済(インデックス2)」以降ならカウント
   const esSubmittedCount = cos.filter(c => c.esSubmitted || PHASES.indexOf(c.phase) >= 2).length;
-  // 未着手、内定、不採用以外は「選考中」
   const activeCount = cos.filter(c => !['未着手','内定','不採用'].includes(c.phase)).length;
-  // フェーズが内定ならカウント
-  const offerCount = cos.filter(c => c.phase === '内定' || c.offerStatus === true).length;
+  const offerCount = cos.filter(c => c.phase === '内定').length; // 内定のカウント
 
   document.getElementById('stat-cards').innerHTML = `
     <div class="stat-card"><div class="val">${entryCount}</div><div class="lbl">エントリー数</div></div>
@@ -602,10 +585,9 @@ function renderTable() {
   
   const tbody = document.getElementById('table-body');
   tbody.innerHTML = cos.map(c => {
-    // 表の表示ステータスをフェーズから自動判定
     const isEsSubmitted = c.esSubmitted || PHASES.indexOf(c.phase) >= 2;
-    const isOffer = c.phase === '内定' || c.offerStatus === true;
-    const isFail = c.phase === '不採用' || c.offerStatus === false;
+    const isOffer = c.phase === '内定';
+    const isFail = c.phase === '不採用';
 
     return `<tr>
       <td><span class="company-link" onclick="showDetail(${c.id})">${c.name}</span></td>
@@ -693,21 +675,49 @@ function saveSchedule(key, val) {
   renderCalendar();
 }
 
+// === 変更：内定・不採用を含むステッパーの描画 ===
 function renderStepper() {
   const c = getCompany(); if (!c) return;
-  const mainPhases = ['未着手','ES作成中','ES提出済','書類選考中','一次面接','二次面接','最終面接'];
-  const currentIdx = mainPhases.indexOf(c.phase);
-  const isFail = c.phase === '不採用'; const isOffer = c.phase === '内定';
+  const currentIdx = PHASES.indexOf(c.phase);
   
   let html = '<div style="display:flex;align-items:flex-start;gap:0;">';
-  mainPhases.forEach((p, i) => {
+  PHASES.forEach((p, i) => {
     let dotClass = 'step-dot';
-    if (isOffer || (currentIdx > i)) dotClass += ' done';
-    else if (currentIdx === i && !isFail) dotClass += ' active';
+    let isDone = false;
+    let isActive = false;
+    let extraStyle = '';
+    
+    // ステータス判定
+    if (c.phase === p) {
+      isActive = true;
+    } else if (currentIdx > i) {
+      if (i <= 6 && (c.phase === '内定' || c.phase === '不採用')) {
+        isDone = true; // 内定か不採用の時、これまでの面接などはすべてDone扱い
+      } else if (c.phase !== '不採用' && c.phase !== '内定') {
+        isDone = true;
+      }
+    }
+
+    if (isDone) dotClass += ' done';
+    if (isActive) {
+      dotClass += ' active';
+      // 選択中かつ特別なフェーズの場合は色を変える
+      if (p === '内定') extraStyle = 'background:#16A34A; border-color:#16A34A; color:white;';
+      if (p === '不採用') extraStyle = 'background:#DC2626; border-color:#DC2626; color:white;';
+    }
+
+    let lineClass = 'step-line';
+    if (isDone || (isActive && i < 6)) lineClass += ' done';
+
+    // アイコンや数字の表示
+    let dotText = i + 1;
+    if (p === '内定') dotText = '🎉';
+    if (p === '不採用') dotText = '×';
+
     html += `<div style="display:flex;flex-direction:column;align-items:center;">
       <div style="display:flex;align-items:center;">
-        <div class="${dotClass}" onclick="setPhase('${p}')" title="${p}">${i+1}</div>
-        ${i < mainPhases.length-1 ? `<div class="step-line ${(isOffer || currentIdx > i) ? 'done':''}"></div>` : ''}
+        <div class="${dotClass}" style="${extraStyle}" onclick="setPhase('${p}')" title="${p}">${dotText}</div>
+        ${i < PHASES.length-1 ? `<div class="${lineClass}"></div>` : ''}
       </div>
       <div class="step-label">${p}</div>
     </div>`;
@@ -716,7 +726,6 @@ function renderStepper() {
   document.getElementById('phase-stepper').innerHTML = html;
 }
 
-// === フェーズ変更時にフラグも自動同期する処理 ===
 function setPhase(phase) {
   const c = getCompany(); if (!c) return;
   c.phase = phase; 
@@ -725,7 +734,6 @@ function setPhase(phase) {
   const pIdx = PHASES.indexOf(phase);
   c.esSubmitted = pIdx >= 2;
   
-  // 内定・不採用も連動
   if (phase === '内定') c.offerStatus = true;
   else if (phase === '不採用') c.offerStatus = false;
   else c.offerStatus = null;
@@ -735,14 +743,34 @@ function setPhase(phase) {
   renderStepper(); renderStats(); renderTable();
 }
 
+// === 変更：ES設問・回答のUI分離 ＆ 削除機能追加 ===
 function renderESList() {
   const c = getCompany(); if (!c) return;
   document.getElementById('es-list').innerHTML = c.esQuestions.map((q, i) => `
-    <div class="es-question">
-      <div class="es-q-header"><div class="es-q-text" contenteditable="true" onblur="saveESQ(${i}, 'q', this.textContent)">${q.q}</div></div>
-      <div class="es-a-wrap"><div class="editable es-answer" contenteditable="true" onblur="saveESQ(${i}, 'a', this.textContent)">${q.a}</div></div>
+    <div class="es-question" style="position:relative; background: #FAFAF8; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 16px;">
+      <button onclick="deleteESQ(${i})" class="btn btn-ghost" style="position:absolute; top:8px; right:8px; color:#DC2626; padding:4px 8px; font-size:11px;">🗑 削除</button>
+      
+      <div style="margin-bottom: 12px; padding-right: 60px;">
+        <div style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:6px;">設問 ${i+1}</div>
+        <div class="editable editable-sm" contenteditable="true" onblur="saveESQ(${i}, 'q', this.textContent)" data-placeholder="（例）学生時代に最も力を入れたことはなんですか？">${q.q}</div>
+      </div>
+      
+      <div>
+        <div style="font-size:11px; font-weight:700; color:var(--text2); margin-bottom:6px;">回答</div>
+        <div class="editable es-answer" contenteditable="true" onblur="saveESQ(${i}, 'a', this.textContent)" data-placeholder="ここに回答を入力...">${q.a}</div>
+      </div>
     </div>
   `).join('');
+}
+
+// 追加：ES削除機能
+function deleteESQ(index) {
+  const c = getCompany(); if (!c) return;
+  if (confirm('この設問と回答を削除してもよろしいですか？')) {
+    c.esQuestions.splice(index, 1);
+    saveState();
+    renderESList();
+  }
 }
 
 function saveESQ(index, field, val) {
@@ -753,7 +781,7 @@ function saveESQ(index, field, val) {
 
 function addQuestion() {
   const c = getCompany(); if (!c) return;
-  c.esQuestions.push({id:Date.now(), q:'新しい設問', a:'', maxLen:400});
+  c.esQuestions.push({id:Date.now(), q:'', a:'', maxLen:400}); // 空欄で追加してプレースホルダーを見せる
   saveState(); renderESList();
 }
 
@@ -816,29 +844,24 @@ function exportData() {
 function importData() { document.getElementById('import-input').click(); }
 function doImport(e) { /* 省略 */ }
 
-// アプリの起動関数
 async function initApp() {
-  // 合言葉が間違っている場合は画面を表示しない
   if (secretKey !== EXPECTED_KEY) {
     document.body.innerHTML = '<div style="padding:40px; text-align:center; font-size:16px;">アクセス権がありません。<br>正しいURLからアクセスしてください。</div>';
     return;
   }
   
-  // 読み込み中表示
   document.body.insertAdjacentHTML('afterbegin', '<div id="loading" style="text-align:center; padding:40px; font-size: 14px;">クラウドからデータを読み込み中...</div>');
   
-  state = await loadState(); // クラウドからデータ取得
+  state = await loadState();
   
   const loadingEl = document.getElementById('loading');
-  if(loadingEl) loadingEl.remove(); // 読み込み中表示を消す
+  if(loadingEl) loadingEl.remove();
   
-  // アプリ本体を表示
   document.getElementById('app').style.display = 'block';
 
-  renderAll(); // 画面を描画
+  renderAll();
 }
 
-// 起動！
 initApp();
 </script>
 </body>
