@@ -548,14 +548,24 @@ function addEvent(eventsObj, dateStr, name, cls, id) {
 function prevMonth() { currentMonth--; if(currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
 function nextMonth() { currentMonth++; if(currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); }
 
-/* ================= UI描画系 ================= */
+/* ================= UI描画系（連動機能追加） ================= */
 function renderStats() {
   const cos = state.companies;
+  
+  // ダッシュボードの集計（フェーズと自動連動）
+  const entryCount = cos.length;
+  // フェーズが「ES提出済(インデックス2)」以降ならカウント
+  const esSubmittedCount = cos.filter(c => c.esSubmitted || PHASES.indexOf(c.phase) >= 2).length;
+  // 未着手、内定、不採用以外は「選考中」
+  const activeCount = cos.filter(c => !['未着手','内定','不採用'].includes(c.phase)).length;
+  // フェーズが内定ならカウント
+  const offerCount = cos.filter(c => c.phase === '内定' || c.offerStatus === true).length;
+
   document.getElementById('stat-cards').innerHTML = `
-    <div class="stat-card"><div class="val">${cos.length}</div><div class="lbl">エントリー数</div></div>
-    <div class="stat-card"><div class="val" style="color:#2563EB">${cos.filter(c=>c.esSubmitted).length}</div><div class="lbl">ES提出済</div></div>
-    <div class="stat-card"><div class="val" style="color:#7C3AED">${cos.filter(c=>!['未着手','内定','不採用'].includes(c.phase)).length}</div><div class="lbl">選考中</div></div>
-    <div class="stat-card"><div class="val" style="color:#16A34A">${cos.filter(c=>c.phase==='内定').length}</div><div class="lbl">内定</div></div>
+    <div class="stat-card"><div class="val">${entryCount}</div><div class="lbl">エントリー数</div></div>
+    <div class="stat-card"><div class="val" style="color:#2563EB">${esSubmittedCount}</div><div class="lbl">ES提出済</div></div>
+    <div class="stat-card"><div class="val" style="color:#7C3AED">${activeCount}</div><div class="lbl">選考中</div></div>
+    <div class="stat-card"><div class="val" style="color:#16A34A">${offerCount}</div><div class="lbl">内定</div></div>
   `;
 }
 
@@ -590,19 +600,26 @@ function renderTable() {
   if (tableSortMode === 'interest') cos.sort((a,b) => (b.interest || 0) - (a.interest || 0));
   
   const tbody = document.getElementById('table-body');
-  tbody.innerHTML = cos.map(c => `<tr>
-    <td><span class="company-link" onclick="showDetail(${c.id})">${c.name}</span></td>
-    <td style="color:var(--text2)">${c.industry||'—'}</td>
-    <td>★${c.interest || 3}</td>
-    <td>${phaseBadge(c.phase)}</td>
-    <td style="font-size:12px">${c.esDeadline||'—'}</td>
-    <td>${daysLeftHTML(c.esDeadline)}</td>
-    <td style="text-align:center">${c.esSubmitted?'○':'—'}</td>
-    <td style="font-size:12px">${c.interview1||'—'}</td>
-    <td style="font-size:12px">${c.interviewFinal||'—'}</td>
-    <td>${c.offerStatus===true?'内定':c.offerStatus===false?'不採用':'—'}</td>
-    <td>${c.hp ? `<a href="${c.hp}" target="_blank" style="color:var(--accent);font-size:12px">開く</a>` : '—'}</td>
-  </tr>`).join('');
+  tbody.innerHTML = cos.map(c => {
+    // 表の表示ステータスをフェーズから自動判定
+    const isEsSubmitted = c.esSubmitted || PHASES.indexOf(c.phase) >= 2;
+    const isOffer = c.phase === '内定' || c.offerStatus === true;
+    const isFail = c.phase === '不採用' || c.offerStatus === false;
+
+    return `<tr>
+      <td><span class="company-link" onclick="showDetail(${c.id})">${c.name}</span></td>
+      <td style="color:var(--text2)">${c.industry||'—'}</td>
+      <td>★${c.interest || 3}</td>
+      <td>${phaseBadge(c.phase)}</td>
+      <td style="font-size:12px">${c.esDeadline||'—'}</td>
+      <td>${daysLeftHTML(c.esDeadline)}</td>
+      <td style="text-align:center; color:#2563EB; font-weight:bold;">${isEsSubmitted ? '○' : '—'}</td>
+      <td style="font-size:12px">${c.interview1||'—'}</td>
+      <td style="font-size:12px">${c.interviewFinal||'—'}</td>
+      <td style="text-align:center; font-weight:bold; color:${isOffer ? '#16A34A' : (isFail ? '#DC2626' : 'var(--text)')};">${isOffer ? '○' : (isFail ? '×' : '—')}</td>
+      <td>${c.hp ? `<a href="${c.hp}" target="_blank" style="color:var(--accent);font-size:12px">開く</a>` : '—'}</td>
+    </tr>`;
+  }).join('');
 }
 
 function addCompany() {
@@ -617,7 +634,6 @@ function addCompany() {
   saveState(); showDetail(newId);
 }
 
-// === 追加：企業名の編集機能 ===
 function editCompanyName() {
   const c = getCompany(); if (!c) return;
   const newName = prompt('企業名を変更してください:', c.name);
@@ -630,13 +646,12 @@ function editCompanyName() {
   }
 }
 
-// === 追加：企業の削除機能 ===
 function deleteCompany() {
   const c = getCompany(); if (!c) return;
   if (confirm(`本当に「${c.name}」を一覧から削除しますか？\nこの操作は取り消せません。`)) {
     state.companies = state.companies.filter(comp => comp.id !== c.id);
     saveState();
-    showHome(); // 削除後は一覧画面に戻る
+    showHome(); 
   }
 }
 
@@ -649,11 +664,9 @@ function renderDetail() {
   const hpEl = document.getElementById('detail-hp');
   hpEl.href = c.hp || '#'; hpEl.style.display = c.hp ? '' : 'none';
   
-  // 業界と志望度の反映
   document.getElementById('edit-industry').value = c.industry || '';
   document.getElementById('edit-interest').value = c.interest || 3;
 
-  // スケジュール設定への反映
   document.getElementById('edit-es-deadline').value = c.esDeadline || '';
   document.getElementById('edit-int-1').value = c.interview1 || '';
   document.getElementById('edit-int-2').value = c.interview2 || '';
@@ -664,12 +677,11 @@ function renderDetail() {
   renderResearchGrid();
 }
 
-// === 追加：基本情報（業界・志望度）の保存機能 ===
 function saveBasicInfo(key, val) {
   const c = getCompany(); if(!c) return;
   c[key] = val;
   saveState();
-  renderTable(); // テーブルの★の数などを更新
+  renderTable(); 
 }
 
 function saveSchedule(key, val) {
@@ -703,9 +715,21 @@ function renderStepper() {
   document.getElementById('phase-stepper').innerHTML = html;
 }
 
+// === フェーズ変更時にフラグも自動同期する処理 ===
 function setPhase(phase) {
   const c = getCompany(); if (!c) return;
-  c.phase = phase; saveState();
+  c.phase = phase; 
+  
+  // ES提出済以上のフェーズなら自動的にフラグを立てる
+  const pIdx = PHASES.indexOf(phase);
+  c.esSubmitted = pIdx >= 2;
+  
+  // 内定・不採用も連動
+  if (phase === '内定') c.offerStatus = true;
+  else if (phase === '不採用') c.offerStatus = false;
+  else c.offerStatus = null;
+  
+  saveState();
   document.getElementById('detail-phase-badge').innerHTML = phaseBadge(phase);
   renderStepper(); renderStats(); renderTable();
 }
