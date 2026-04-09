@@ -113,10 +113,6 @@ tbody tr:hover { background: #FAFAF8; }
 .step-line.done { background: #4CAF50; }
 .step-label { font-size: 10px; color: var(--text3); text-align: center; margin-top: 3px; white-space: nowrap; }
 
-/* Company research grid */
-.research-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
-.research-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-
 /* Inline input */
 .inline-input { border: none; border-bottom: 1px solid transparent; outline: none; font-family: var(--font); font-size: 13px; color: var(--text); background: transparent; width: 100%; padding: 2px 4px; transition: border 0.15s; }
 
@@ -271,7 +267,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     </div>
 
     <div id="tab-self" class="tab-content active">
-      <div class="grid2">
+      <div class="grid2" style="margin-bottom:24px;">
         <div>
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">自己PR（約300字）</div>
@@ -286,15 +282,49 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
           </div>
           <div class="editable" contenteditable="true" data-key="selfAnalysis.gakuchika" onblur="saveSelfAnalysis('gakuchika',this.textContent)"></div>
         </div>
-        <div><div class="field-label">長所</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.strength" onblur="saveSelfAnalysis('strength',this.textContent)"></div></div>
-        <div><div class="field-label">短所・改善への取り組み</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.weakness" onblur="saveSelfAnalysis('weakness',this.textContent)"></div></div>
-        <div class="span2"><div class="field-label">キャリアビジョン（5年後・10年後）</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.career" onblur="saveSelfAnalysis('career',this.textContent)"></div></div>
-        <div class="span2"><div class="field-label">働く上で大切にしたいこと</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.values" onblur="saveSelfAnalysis('values',this.textContent)"></div></div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">長所</div>
+            <button class="comment-btn" id="btn-strength" onclick="openCommentModal('strength', '長所')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.strength" onblur="saveSelfAnalysis('strength',this.textContent)"></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">短所・改善への取り組み</div>
+            <button class="comment-btn" id="btn-weakness" onclick="openCommentModal('weakness', '短所')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.weakness" onblur="saveSelfAnalysis('weakness',this.textContent)"></div>
+        </div>
+        <div class="span2">
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">キャリアビジョン（5年後・10年後）</div>
+            <button class="comment-btn" id="btn-career" onclick="openCommentModal('career', 'キャリアビジョン')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.career" onblur="saveSelfAnalysis('career',this.textContent)"></div>
+        </div>
+        <div class="span2">
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">働く上で大切にしたいこと</div>
+            <button class="comment-btn" id="btn-values" onclick="openCommentModal('values', '働く上で大切にしたいこと')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.values" onblur="saveSelfAnalysis('values',this.textContent)"></div>
+        </div>
+      </div>
+      <div style="border-top:1px dashed var(--border); padding-top:16px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:12px;">追加の設問＆回答（自己分析用）</div>
+        <div id="self-qa-list"></div>
+        <button class="btn" onclick="addDynamicQA('selfAnalysis')">＋ 設問を追加</button>
       </div>
     </div>
 
     <div id="tab-interview" class="tab-content">
-      <div style="margin-top:0px;">
+      <div style="margin-bottom:24px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:12px;">頻出質問 Q&A</div>
+        <div id="int-qa-list"></div>
+        <button class="btn" onclick="addDynamicQA('interview')">＋ 質問を追加</button>
+      </div>
+      <div style="border-top:1px dashed var(--border); padding-top:16px;">
         <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
           <div class="field-label" style="margin:0;">逆質問リスト（面接官への質問）</div>
           <button class="comment-btn" id="btn-reverseQA" onclick="openCommentModal('reverseQA', '逆質問リスト')">💬 添削</button>
@@ -304,12 +334,54 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     </div>
 
     <div id="tab-research" class="tab-content">
-      <div class="grid2">
-        <div><div class="field-label">研究タイトル</div><div class="editable editable-sm" contenteditable="true" data-key="research.title" onblur="saveResearchOverall('title',this.textContent)"></div></div>
-        <div><div class="field-label">研究分野・キーワード</div><div class="editable editable-sm" contenteditable="true" data-key="research.field" onblur="saveResearchOverall('field',this.textContent)"></div></div>
-        <div class="span2"><div class="field-label">研究概要（一般向け 3分説明バージョン）</div><div class="editable" contenteditable="true" data-key="research.overview" onblur="saveResearchOverall('overview',this.textContent)"></div></div>
-        <div><div class="field-label">使用技術・手法・環境</div><div class="editable editable-sm" contenteditable="true" data-key="research.tech" onblur="saveResearchOverall('tech',this.textContent)"></div></div>
-        <div><div class="field-label">成果・アピールポイント</div><div class="editable editable-sm" contenteditable="true" data-key="research.result" onblur="saveResearchOverall('result',this.textContent)"></div></div>
+      <div class="grid2" style="margin-bottom:24px;">
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">研究タイトル</div>
+            <button class="comment-btn" id="btn-title" onclick="openCommentModal('title', '研究タイトル')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.title" onblur="saveResearchOverall('title',this.textContent)"></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">研究分野・キーワード</div>
+            <button class="comment-btn" id="btn-field" onclick="openCommentModal('field', '研究分野')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.field" onblur="saveResearchOverall('field',this.textContent)"></div>
+        </div>
+        <div class="span2">
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">研究概要（一般向け 3分説明バージョン）</div>
+            <button class="comment-btn" id="btn-overview" onclick="openCommentModal('overview', '研究概要')">💬 添削</button>
+          </div>
+          <div class="editable" contenteditable="true" data-key="research.overview" onblur="saveResearchOverall('overview',this.textContent)"></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">使用技術・手法・環境</div>
+            <button class="comment-btn" id="btn-tech" onclick="openCommentModal('tech', '使用技術')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.tech" onblur="saveResearchOverall('tech',this.textContent)"></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">成果・アピールポイント</div>
+            <button class="comment-btn" id="btn-result" onclick="openCommentModal('result', '研究成果')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.result" onblur="saveResearchOverall('result',this.textContent)"></div>
+        </div>
+        <div class="span2">
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">研究を通じて身についたこと</div>
+            <button class="comment-btn" id="btn-learning" onclick="openCommentModal('learning', '研究で得たこと')">💬 添削</button>
+          </div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.learning" onblur="saveResearchOverall('learning',this.textContent)"></div>
+        </div>
+      </div>
+      <div style="border-top:1px dashed var(--border); padding-top:16px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:12px;">追加の設問＆回答（研究深掘り用など）</div>
+        <div id="res-qa-list"></div>
+        <button class="btn" onclick="addDynamicQA('research')">＋ 設問を追加</button>
       </div>
     </div>
   </div>
@@ -382,15 +454,6 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     </div>
     <div style="padding:16px 20px;" id="es-list"></div>
   </div>
-
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">企業情報・調査メモ</span>
-    </div>
-    <div style="padding:16px 20px;">
-      <div class="grid2" id="research-grid"></div>
-    </div>
-  </div>
 </div>
 </main>
 </div>
@@ -426,11 +489,9 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 <div id="toast">保存しました</div>
 
 <script>
-// --- ★ここにご自身のIDとキーを再度入力してください ---
 const BIN_ID = '69d66d7436566621a88f7121';
 const API_KEY = '$2a$10$o0ckigFFVu0U9kEmzwnpduZygWWYhCMH9pl6oLENj393iJv/HbzhO';
 
-// 要求するパスコード
 const EXPECTED_PASSCODE = 'MORI'; 
 
 let state = null;
@@ -441,7 +502,6 @@ let activeCommentTarget = null;
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth(); 
 
-// ★フェーズに「添削待ち」「添削完了」「最終面接待ち」を追加
 const PHASES = ['未着手','ES作成中','添削待ち','添削完了','ES提出済','書類選考中','一次面接','二次面接','最終面接','最終面接待ち','内定','不採用'];
 const PHASE_COLORS = {
   '未着手':     {bg:'#F1F1EF',text:'#6B6B65',border:'#D0D0CB'},
@@ -457,22 +517,14 @@ const PHASE_COLORS = {
   '内定':       {bg:'#DCFCE7',text:'#166534',border:'#86EFAC'},
   '不採用':     {bg:'#FEE2E2',text:'#991B1B',border:'#FCA5A5'},
 };
-const RESEARCH_FIELDS = [
-  {key:'overview', label:'事業概要', icon:'🏢'},
-  {key:'strength', label:'強み・特徴・競合優位性', icon:'💡'},
-  {key:'news',     label:'最近のニュース・注目トピック', icon:'📰'},
-  {key:'motivation',label:'志望動機メモ', icon:'🎯'},
-  {key:'benefits', label:'福利厚生・働き方・社風', icon:'☕'},
-  {key:'obNotes',  label:'OB/OG訪問メモ', icon:'👥'},
-];
 
 function defaultData() {
   return {
     companies: [],
-    selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:''},
+    selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:'', qa:[]}, // qa追加
     interview:{ qa:[], reverseQA:'' },
-    research:{title:'',field:'',overview:'',tech:'',result:'',learning:''},
-    comments: {} // チャット履歴保存用
+    research:{title:'',field:'',overview:'',tech:'',result:'',learning:'', qa:[]}, // qa追加
+    comments: {} 
   };
 }
 
@@ -485,6 +537,9 @@ async function loadState() {
       const data = await response.json();
       let rec = Object.keys(data.record).length > 0 ? data.record : defaultData();
       if (!rec.comments) rec.comments = {}; 
+      // データ構造のマイグレーション（過去のデータにも新しい空リストを追加）
+      if (!rec.selfAnalysis.qa) rec.selfAnalysis.qa = [];
+      if (!rec.research.qa) rec.research.qa = [];
       return rec;
     }
     return defaultData();
@@ -500,16 +555,11 @@ function saveState() {
     try {
       await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': API_KEY
-        },
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
         body: JSON.stringify(state)
       });
       showToast('保存しました');
-    } catch(e) {
-      showToast('保存に失敗しました');
-    }
+    } catch(e) { showToast('保存に失敗しました'); }
   }, 1500);
 }
 
@@ -535,26 +585,33 @@ function showDetail(id) {
 
 function renderAll() {
   renderStats();
-  renderRecentComments(); // 追加：ダッシュボード履歴
+  renderRecentComments();
   renderTable();
   renderCalendar();
-  renderSelfAnalysis();
+  renderAllTabs(); // 全タブのデータを描画
 }
 
-// === 追加：最新の添削履歴を表示 ===
+// ダッシュボード：最新の添削履歴を表示
 function renderRecentComments() {
   const container = document.getElementById('recent-comments');
   let allComments = [];
+
+  const fieldNames = {
+    'selfPR':'自己PR', 'gakuchika':'ガクチカ', 'strength':'長所', 'weakness':'短所',
+    'career':'キャリアビジョン', 'values':'働く上で大切にしたいこと',
+    'reverseQA':'逆質問リスト',
+    'title':'研究タイトル', 'field':'研究分野', 'overview':'研究概要',
+    'tech':'使用技術', 'result':'研究成果', 'learning':'研究で得たこと'
+  };
 
   for (const targetId in state.comments) {
     const thread = state.comments[targetId];
     let targetName = '';
     let companyName = '';
     
-    if (targetId === 'selfPR') targetName = '自己PR';
-    else if (targetId === 'gakuchika') targetName = 'ガクチカ';
-    else if (targetId === 'reverseQA') targetName = '逆質問リスト';
-    else if (targetId.startsWith('es_')) {
+    if (fieldNames[targetId]) {
+      targetName = fieldNames[targetId];
+    } else if (targetId.startsWith('es_')) {
       const esId = parseInt(targetId.replace('es_', ''));
       let found = false;
       for (const c of state.companies) {
@@ -562,11 +619,16 @@ function renderRecentComments() {
         if (qIdx !== -1) {
           companyName = c.name;
           targetName = `設問${qIdx + 1}`;
-          found = true;
-          break;
+          found = true; break;
         }
       }
       if(!found) continue; 
+    } else if (targetId.startsWith('self_qa_')) {
+      targetName = '自己分析(追加設問)';
+    } else if (targetId.startsWith('int_qa_')) {
+      targetName = '面接対策(Q&A)';
+    } else if (targetId.startsWith('res_qa_')) {
+      targetName = '研究概要(追加設問)';
     }
 
     thread.forEach(c => {
@@ -574,7 +636,6 @@ function renderRecentComments() {
     });
   }
 
-  // 最新順にソートして10件表示
   allComments.sort((a, b) => b.timestamp - a.timestamp);
   const recent = allComments.slice(0, 10);
 
@@ -612,30 +673,30 @@ function jumpToComment(targetId, companyName) {
     const c = state.companies.find(comp => comp.name === companyName);
     if (c) {
       showDetail(c.id);
-      openCommentModal(targetId, `${c.name}の${targetId.startsWith('es_') ? '設問' : targetId}`);
+      openCommentModal(targetId, `${c.name}の設問`);
     }
   } else {
     showHome();
-    if(targetId === 'reverseQA') switchTab(document.querySelector('.tab-btn:nth-child(2)'), 'interview');
+    if(targetId.startsWith('int_qa_') || targetId === 'reverseQA') switchTab(document.querySelector('.tab-btn:nth-child(2)'), 'interview');
+    else if(targetId.startsWith('res_qa_') || ['title','field','overview','tech','result','learning'].includes(targetId)) switchTab(document.querySelector('.tab-btn:nth-child(3)'), 'research');
     else switchTab(document.querySelector('.tab-btn:nth-child(1)'), 'self');
-    openCommentModal(targetId, targetId === 'selfPR' ? '自己PR' : targetId === 'gakuchika' ? 'ガクチカ' : '逆質問リスト');
+    
+    openCommentModal(targetId, '共通項目の添削');
   }
 }
 
-function renderCalendar() {
+// --- カレンダー処理 ---
+function renderCalendar() { /* 省略せずそのまま */
   const grid = document.getElementById('calendar-grid');
   if(!grid) return;
   const label = document.getElementById('calendar-month-label');
   label.textContent = `${currentYear}年 ${currentMonth + 1}月`;
-
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const today = new Date();
-
   let html = '';
   const dayNames = ['日','月','火','水','木','金','土'];
   dayNames.forEach(d => html += `<div class="calendar-day-header">${d}</div>`);
-
   const events = {};
   state.companies.forEach(c => {
     if(c.esDeadline) addEvent(events, c.esDeadline, c.name + ' ES締切', 'event-es', c.id);
@@ -643,38 +704,24 @@ function renderCalendar() {
     if(c.interview2) addEvent(events, c.interview2, c.name + ' 2次面接', 'event-int2', c.id);
     if(c.interviewFinal) addEvent(events, c.interviewFinal, c.name + ' 最終面接', 'event-final', c.id);
   });
-
-  for(let i = 0; i < firstDay; i++) {
-    html += `<div class="calendar-day other-month"></div>`;
-  }
-
+  for(let i = 0; i < firstDay; i++) { html += `<div class="calendar-day other-month"></div>`; }
   for(let i = 1; i <= daysInMonth; i++) {
     const isToday = today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === i;
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
     const dayEvents = events[dateStr] || [];
-
-    let eventHtml = dayEvents.map(e => `
-      <div class="event-badge ${e.cls}" onclick="showDetail(${e.id}); event.stopPropagation();" title="${e.name}">
-        ${e.name}
-      </div>
-    `).join('');
-
-    html += `<div class="calendar-day ${isToday ? 'today' : ''}">
-               <div class="calendar-date">${i}</div>
-               ${eventHtml}
-             </div>`;
+    let eventHtml = dayEvents.map(e => `<div class="event-badge ${e.cls}" onclick="showDetail(${e.id}); event.stopPropagation();" title="${e.name}">${e.name}</div>`).join('');
+    html += `<div class="calendar-day ${isToday ? 'today' : ''}"><div class="calendar-date">${i}</div>${eventHtml}</div>`;
   }
   grid.innerHTML = html;
 }
-
 function addEvent(eventsObj, dateStr, name, cls, id) {
   if(!eventsObj[dateStr]) eventsObj[dateStr] = [];
   eventsObj[dateStr].push({name, cls, id});
 }
-
 function prevMonth() { currentMonth--; if(currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
 function nextMonth() { currentMonth++; if(currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); }
 
+// --- 統計＆テーブル ---
 function renderStats() {
   const cos = state.companies;
   const entryCount = cos.length;
@@ -689,14 +736,12 @@ function renderStats() {
     <div class="stat-card"><div class="val" style="color:#16A34A">${offerCount}</div><div class="lbl">内定</div></div>
   `;
 }
-
 function daysLeft(dateStr) {
   if (!dateStr) return null;
   const today = new Date(); today.setHours(0,0,0,0);
   const d = new Date(dateStr); d.setHours(0,0,0,0);
   return Math.round((d - today) / 86400000);
 }
-
 function daysLeftHTML(dateStr) {
   const d = daysLeft(dateStr);
   if (d === null) return '—';
@@ -706,7 +751,6 @@ function daysLeftHTML(dateStr) {
   if (d <= 7) return `<span class="days-warn">残${d}日</span>`;
   return `<span class="days-ok">残${d}日</span>`;
 }
-
 function phaseBadge(phase) {
   const c = PHASE_COLORS[phase] || PHASE_COLORS['未着手'];
   return `<span class="badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${phase}</span>`;
@@ -715,7 +759,6 @@ function phaseBadge(phase) {
 let tableSortMode = null;
 function sortTable(mode) { tableSortMode = mode; renderTable(); }
 
-// === 変更：表のフィルター機能修正 ===
 function renderTable() {
   const phaseFilter = document.getElementById('filter-phase').value;
   const searchFilter = document.getElementById('filter-search').value.toLowerCase();
@@ -773,7 +816,7 @@ function editCompanyName() {
     document.getElementById('detail-name').textContent = c.name;
     renderTable();
     renderCalendar();
-    renderRecentComments(); // 企業名が変わったので履歴も更新
+    renderRecentComments();
   }
 }
 
@@ -808,7 +851,6 @@ function renderDetail() {
 
   renderStepper();
   renderESList();
-  renderResearchGrid();
 }
 
 function saveBasicInfo(key, val) {
@@ -883,84 +925,55 @@ function renderStepper() {
 function setPhase(phase) {
   const c = getCompany(); if (!c) return;
   c.phase = phase; 
-  
   const pIdx = PHASES.indexOf(phase);
   c.esSubmitted = pIdx >= PHASES.indexOf('ES提出済');
-  
   if (phase === '内定') c.offerStatus = true;
   else if (phase === '不採用') c.offerStatus = false;
   else c.offerStatus = null;
-  
   saveState();
   document.getElementById('detail-phase-badge').innerHTML = phaseBadge(phase);
   renderStepper(); renderStats(); renderTable();
 }
 
-function renderESList() {
-  const c = getCompany(); if (!c) return;
-  document.getElementById('es-list').innerHTML = c.esQuestions.map((q, i) => {
-    const cId = `es_${q.id}`;
+
+// ==========================================
+// ★ 設問・回答の描画（共通コンポーネント化）
+// ==========================================
+
+function renderDynamicQA(listData, containerId, idPrefix, titlePrefix, type) {
+  const html = listData.map((q, i) => {
+    const cId = `${idPrefix}_${q.id}`;
     const commentCount = state.comments[cId] ? state.comments[cId].length : 0;
     const btnClass = commentCount > 0 ? "comment-btn has-comments" : "comment-btn";
 
     return `
     <div class="es-question" style="position:relative; background: #FAFAF8; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 16px;">
-      
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; padding-right: 60px;">
-        <div style="font-size:12px; font-weight:700; color:var(--accent);">設問 ${i+1}</div>
-        <button onclick="openCommentModal('${cId}', '${c.name}の設問${i+1}')" class="${btnClass}">💬 添削 ${commentCount > 0 ? `(${commentCount})` : ''}</button>
+        <div style="font-size:12px; font-weight:700; color:var(--accent);">${titlePrefix} ${i+1}</div>
+        <button onclick="openCommentModal('${cId}', '${titlePrefix}${i+1}')" class="${btnClass}">💬 添削 ${commentCount > 0 ? `(${commentCount})` : ''}</button>
       </div>
-      <button onclick="deleteESQ(${i})" class="btn btn-ghost" style="position:absolute; top:12px; right:12px; color:#DC2626; padding:4px 8px; font-size:11px;">🗑 削除</button>
+      <button onclick="deleteDynamicQA('${type}', ${i})" class="btn btn-ghost" style="position:absolute; top:12px; right:12px; color:#DC2626; padding:4px 8px; font-size:11px;">🗑 削除</button>
       
       <div style="margin-bottom: 12px;">
-        <div class="editable editable-sm" contenteditable="true" onblur="saveESQ(${i}, 'q', this.textContent)" data-placeholder="（例）学生時代に最も力を入れたことはなんですか？">${q.q}</div>
+        <div class="editable editable-sm" contenteditable="true" onblur="saveDynamicQA('${type}', ${i}, 'q', this.textContent)" data-placeholder="設問を入力...">${q.q}</div>
       </div>
-      
       <div>
         <div style="font-size:11px; font-weight:700; color:var(--text2); margin-bottom:6px;">回答</div>
-        <div class="editable es-answer" contenteditable="true" onblur="saveESQ(${i}, 'a', this.textContent)" data-placeholder="ここに回答を入力...">${q.a}</div>
+        <div class="editable es-answer" contenteditable="true" onblur="saveDynamicQA('${type}', ${i}, 'a', this.textContent)" data-placeholder="回答を入力...">${q.a}</div>
       </div>
     </div>
   `}).join('');
+  document.getElementById(containerId).innerHTML = html;
 }
 
-function deleteESQ(index) {
+// 企業ESの描画
+function renderESList() {
   const c = getCompany(); if (!c) return;
-  if (confirm('この設問と回答を削除してもよろしいですか？')) {
-    c.esQuestions.splice(index, 1);
-    saveState();
-    renderESList();
-  }
+  renderDynamicQA(c.esQuestions, 'es-list', 'es', '設問', 'es');
 }
 
-function saveESQ(index, field, val) {
-  const c = getCompany(); if (!c) return;
-  c.esQuestions[index][field] = val;
-  saveState();
-}
-
-function addQuestion() {
-  const c = getCompany(); if (!c) return;
-  c.esQuestions.push({id:Date.now(), q:'', a:'', maxLen:400});
-  saveState(); renderESList();
-}
-
-function renderResearchGrid() {
-  const c = getCompany(); if (!c) return;
-  document.getElementById('research-grid').innerHTML = RESEARCH_FIELDS.map(f => `
-    <div class="research-card">
-      <div class="research-label">${f.label}</div>
-      <div class="editable editable-sm" contenteditable="true" onblur="saveResearch('${f.key}',this.textContent)">${c.research[f.key]||''}</div>
-    </div>
-  `).join('');
-}
-function saveResearch(key, val) { const c = getCompany(); if (!c) return; c.research[key] = val; saveState(); }
-
-function saveSelfAnalysis(key, val) { state.selfAnalysis[key] = val; saveState(); }
-function saveResearchOverall(key, val) { state.research[key] = val; saveState(); }
-function saveInterviewReverseQA(val) { state.interview.reverseQA = val; saveState(); }
-
-function renderSelfAnalysis() {
+function renderAllTabs() {
+  // 固定フィールドの値セット
   const els = document.querySelectorAll('[data-key^="selfAnalysis."]');
   els.forEach(el => {
     const key = el.getAttribute('data-key').split('.')[1];
@@ -973,9 +986,17 @@ function renderSelfAnalysis() {
   });
   document.querySelector('[data-key="interview.reverseQA"]').textContent = state.interview.reverseQA || '';
 
-  updateCommentBtn('selfPR', 'btn-selfPR');
-  updateCommentBtn('gakuchika', 'btn-gakuchika');
-  updateCommentBtn('reverseQA', 'btn-reverseQA');
+  // 固定フィールドの添削ボタン更新
+  const basicFields = [
+    'selfPR', 'gakuchika', 'strength', 'weakness', 'career', 'values',
+    'reverseQA', 'title', 'field', 'overview', 'tech', 'result', 'learning'
+  ];
+  basicFields.forEach(f => updateCommentBtn(f, `btn-${f}`));
+
+  // 動的QAリストの描画
+  renderDynamicQA(state.selfAnalysis.qa, 'self-qa-list', 'self_qa', '追加設問', 'selfAnalysis');
+  renderDynamicQA(state.interview.qa, 'int-qa-list', 'int_qa', 'Q&A', 'interview');
+  renderDynamicQA(state.research.qa, 'res-qa-list', 'res_qa', '追加設問', 'research');
 }
 
 function updateCommentBtn(targetId, btnId) {
@@ -984,36 +1005,82 @@ function updateCommentBtn(targetId, btnId) {
   const count = state.comments[targetId] ? state.comments[targetId].length : 0;
   if(count > 0) {
     btn.className = "comment-btn has-comments";
-    btn.textContent = `💬 添削 (${count})`;
+    btn.innerHTML = `💬 添削 (${count})`;
   } else {
     btn.className = "comment-btn";
-    btn.textContent = `💬 添削`;
+    btn.innerHTML = `💬 添削`;
   }
 }
+
+// 動的QAの追加・保存・削除（共通処理）
+function addDynamicQA(type) {
+  const newItem = {id:Date.now(), q:'', a:''};
+  if (type === 'es') { const c = getCompany(); if(c) c.esQuestions.push(newItem); }
+  else { state[type].qa.push(newItem); }
+  saveState();
+  if (type === 'es') renderESList();
+  else renderAllTabs();
+}
+
+function saveDynamicQA(type, index, field, val) {
+  if (type === 'es') { const c = getCompany(); if(c) c.esQuestions[index][field] = val; }
+  else { state[type].qa[index][field] = val; }
+  saveState();
+}
+
+function deleteDynamicQA(type, index) {
+  if (confirm('この設問と回答を削除してもよろしいですか？')) {
+    if (type === 'es') { const c = getCompany(); if(c) c.esQuestions.splice(index, 1); }
+    else { state[type].qa.splice(index, 1); }
+    saveState();
+    if (type === 'es') renderESList();
+    else renderAllTabs();
+  }
+}
+
+function addQuestion() { addDynamicQA('es'); } // 互換性のため
+
+// 基本項目の保存
+function saveSelfAnalysis(key, val) { state.selfAnalysis[key] = val; saveState(); }
+function saveResearchOverall(key, val) { state.research[key] = val; saveState(); }
+function saveInterviewReverseQA(val) { state.interview.reverseQA = val; saveState(); }
 
 function switchTab(btn, tabId) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+tabId).classList.add('active');
 }
 
-// === 💬 添削・コメント機能 ===
+// === 💬 添削・コメント機能 (Modal) ===
 function openCommentModal(targetId, title) {
   activeCommentTarget = targetId;
   document.getElementById('modal-title').textContent = title + ' の添削';
   
   let currentText = "（テキストがありません）";
+  
   if (targetId.startsWith('es_')) {
     const esId = parseInt(targetId.replace('es_', ''));
     const c = getCompany();
     if(c) {
       const q = c.esQuestions.find(x => x.id === esId);
-      if(q) currentText = q.a || "（回答が入力されていません）";
+      if(q) currentText = `【設問】\n${q.q}\n\n【回答】\n${q.a}`;
     }
+  } else if (targetId.startsWith('self_qa_')) {
+    const q = state.selfAnalysis.qa.find(x => x.id === parseInt(targetId.replace('self_qa_', '')));
+    if(q) currentText = `【設問】\n${q.q}\n\n【回答】\n${q.a}`;
+  } else if (targetId.startsWith('int_qa_')) {
+    const q = state.interview.qa.find(x => x.id === parseInt(targetId.replace('int_qa_', '')));
+    if(q) currentText = `【設問】\n${q.q}\n\n【回答】\n${q.a}`;
+  } else if (targetId.startsWith('res_qa_')) {
+    const q = state.research.qa.find(x => x.id === parseInt(targetId.replace('res_qa_', '')));
+    if(q) currentText = `【設問】\n${q.q}\n\n【回答】\n${q.a}`;
   } else if (targetId === 'reverseQA') {
     currentText = state.interview.reverseQA || "";
-  } else {
+  } else if (state.selfAnalysis[targetId] !== undefined) {
     currentText = state.selfAnalysis[targetId] || "";
+  } else if (state.research[targetId] !== undefined) {
+    currentText = state.research[targetId] || "";
   }
+  
   document.getElementById('modal-current-text').textContent = currentText;
 
   renderComments();
@@ -1024,7 +1091,7 @@ function closeCommentModal() {
   document.getElementById('comment-modal').style.display = 'none';
   activeCommentTarget = null;
   if(currentCompanyId) renderESList();
-  renderSelfAnalysis();
+  renderAllTabs();
 }
 
 function renderComments() {
@@ -1078,7 +1145,7 @@ function submitComment() {
   inputEl.value = '';
   saveState();
   renderComments();
-  renderRecentComments(); // コメント直後にダッシュボードを更新
+  renderRecentComments(); 
 }
 
 function exportData() {
