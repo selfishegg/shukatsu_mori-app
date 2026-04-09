@@ -122,11 +122,6 @@ tbody tr:hover { background: #FAFAF8; }
 .research-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
 .research-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
-/* Interview QA */
-.qa-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
-.qa-q { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
-.qa-a { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; min-height: 56px; outline: none; font-family: var(--font); font-size: 13px; width: 100%; }
-
 /* Inline input */
 .inline-input { border: none; border-bottom: 1px solid transparent; outline: none; font-family: var(--font); font-size: 13px; color: var(--text); background: transparent; width: 100%; padding: 2px 4px; transition: border 0.15s; }
 
@@ -144,9 +139,8 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 /* Toast */
 #toast { position: fixed; bottom: 24px; right: 24px; background: #1A1A18; color: white; padding: 10px 16px; border-radius: var(--radius-sm); font-size: 12px; opacity: 0; transition: opacity 0.25s; z-index: 9999; pointer-events: none; }
 #toast.show { opacity: 1; }
-.empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
 
-/* カレンダー用追加スタイル */
+/* カレンダー */
 .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 0 16px; margin-bottom: 12px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .calendar-day-header { text-align: center; font-size: 11px; font-weight: 500; color: var(--text2); padding: 4px; }
@@ -161,6 +155,18 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 .event-int2 { background: #E0F2FE; color: #075985; border: 1px solid #7DD3FC; }
 .event-final { background: #FFEDD5; color: #9A3412; border: 1px solid #FCA5A1; }
 
+/* 添削用チャットUI */
+.comment-btn { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:12px; background:var(--bg); border:1px solid var(--border); color:var(--text2); cursor:pointer; font-weight:500; transition:0.2s; }
+.comment-btn:hover { background:var(--accent-bg); color:var(--accent); border-color:var(--accent); }
+.comment-btn.has-comments { background:#FFFBEB; border-color:#FDE68A; color:#B45309; }
+
+.chat-msg { margin-bottom:12px; display:flex; flex-direction:column; }
+.chat-info { font-size:10px; color:var(--text3); margin-bottom:2px; display:flex; justify-content:space-between; }
+.chat-bubble { background:#FAFAF8; padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:13px; line-height:1.5; white-space:pre-wrap; }
+.chat-msg.mine .chat-info { flex-direction:row-reverse; }
+.chat-msg.mine .chat-bubble { background:var(--accent-bg); border-color:#C7D2FE; color:#1E3A8A; align-self:flex-end; border-bottom-right-radius:0; }
+.chat-msg.others .chat-bubble { align-self:flex-start; border-bottom-left-radius:0; }
+
 @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } .stat-cards { grid-template-columns: repeat(2,1fr); } }
 </style>
 </head>
@@ -171,10 +177,6 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
   <div class="header-left">
     <span class="app-title">就活管理</span>
     <div class="header-stats" id="header-stats"></div>
-  </div>
-  <div style="display:flex;gap:8px;">
-    <button class="btn" onclick="exportData()">エクスポート</button>
-    <button class="btn" onclick="importData()">インポート</button>
   </div>
 </header>
 
@@ -217,9 +219,8 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
         <option value="">すべて</option>
         <option>未着手</option><option>ES作成中</option><option>ES提出済</option>
         <option>書類選考中</option><option>一次面接</option><option>二次面接</option>
-        <option>最終面接</option><option>内定</option><option>不採用</option>
+        <option>最終面接</option><option>最終面接待ち</option><option>内定</option><option>不採用</option>
       </select>
-      <input type="text" class="inline-input" id="filter-search" placeholder="企業名を検索..." oninput="renderTable()" style="width:160px;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:12px;">
     </div>
     <div class="table-wrap">
       <table>
@@ -256,18 +257,18 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     <div id="tab-self" class="tab-content active">
       <div class="grid2">
         <div>
-          <div class="field-label">自己PR（約300字）</div>
-          <div class="char-wrap">
-            <div class="editable" contenteditable="true" data-key="selfAnalysis.selfPR" data-max="300" onblur="saveSelfAnalysis('selfPR',this.textContent)"></div>
-            <span class="char-count"></span>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">自己PR（約300字）</div>
+            <button class="comment-btn" id="btn-selfPR" onclick="openCommentModal('selfPR', '自己PR')">💬 添削</button>
           </div>
+          <div class="editable" contenteditable="true" data-key="selfAnalysis.selfPR" onblur="saveSelfAnalysis('selfPR',this.textContent)"></div>
         </div>
         <div>
-          <div class="field-label">ガクチカ（学生時代に最も力を入れたこと）</div>
-          <div class="char-wrap">
-            <div class="editable" contenteditable="true" data-key="selfAnalysis.gakuchika" data-max="400" onblur="saveSelfAnalysis('gakuchika',this.textContent)"></div>
-            <span class="char-count"></span>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+            <div class="field-label" style="margin:0;">ガクチカ（学生時代に最も力を入れたこと）</div>
+            <button class="comment-btn" id="btn-gakuchika" onclick="openCommentModal('gakuchika', 'ガクチカ')">💬 添削</button>
           </div>
+          <div class="editable" contenteditable="true" data-key="selfAnalysis.gakuchika" onblur="saveSelfAnalysis('gakuchika',this.textContent)"></div>
         </div>
         <div><div class="field-label">長所</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.strength" onblur="saveSelfAnalysis('strength',this.textContent)"></div></div>
         <div><div class="field-label">短所・改善への取り組み</div><div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.weakness" onblur="saveSelfAnalysis('weakness',this.textContent)"></div></div>
@@ -277,13 +278,11 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     </div>
 
     <div id="tab-interview" class="tab-content">
-      <div style="margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:500;margin-bottom:12px;">頻出質問 Q&A</div>
-        <div id="qa-list"></div>
-        <button class="btn" onclick="addQA()" style="margin-top:8px;">＋ 質問を追加</button>
-      </div>
-      <div style="margin-top:20px;">
-        <div class="field-label">逆質問リスト（面接官への質問）</div>
+      <div style="margin-top:0px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+          <div class="field-label" style="margin:0;">逆質問リスト（面接官への質問）</div>
+          <button class="comment-btn" id="btn-reverseQA" onclick="openCommentModal('reverseQA', '逆質問リスト')">💬 添削</button>
+        </div>
         <div class="editable" contenteditable="true" data-key="interview.reverseQA" onblur="saveInterviewReverseQA(this.textContent)"></div>
       </div>
     </div>
@@ -295,7 +294,6 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
         <div class="span2"><div class="field-label">研究概要（一般向け 3分説明バージョン）</div><div class="editable" contenteditable="true" data-key="research.overview" onblur="saveResearchOverall('overview',this.textContent)"></div></div>
         <div><div class="field-label">使用技術・手法・環境</div><div class="editable editable-sm" contenteditable="true" data-key="research.tech" onblur="saveResearchOverall('tech',this.textContent)"></div></div>
         <div><div class="field-label">成果・アピールポイント</div><div class="editable editable-sm" contenteditable="true" data-key="research.result" onblur="saveResearchOverall('result',this.textContent)"></div></div>
-        <div class="span2"><div class="field-label">研究を通じて身についたこと</div><div class="editable editable-sm" contenteditable="true" data-key="research.learning" onblur="saveResearchOverall('learning',this.textContent)"></div></div>
       </div>
     </div>
   </div>
@@ -310,7 +308,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     <div class="detail-header">
       <div class="detail-company-name" id="detail-name" onclick="editCompanyName()" title="クリックして企業名を変更">企業名</div>
       <div id="detail-phase-badge"></div>
-      <a id="detail-hp" href="#" target="_blank" class="btn" style="font-size:12px;">公式サイト / マイページ ↗</a>
+      <a id="detail-hp" href="#" target="_blank" class="btn" style="font-size:12px;">マイページ ↗</a>
       <button class="btn btn-danger" onclick="deleteCompany()" style="margin-left:auto;">🗑 削除</button>
     </div>
     <div id="phase-stepper" class="phase-stepper"></div>
@@ -321,7 +319,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     <div class="grid2" style="padding: 16px 20px;">
       <div>
         <div class="field-label">業界</div>
-        <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-industry" onchange="saveBasicInfo('industry', this.value)" placeholder="例：IT・通信">
+        <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-industry" onchange="saveBasicInfo('industry', this.value)">
       </div>
       <div>
         <div class="field-label">志望度 (1〜5)</div>
@@ -333,14 +331,13 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
           <option value="1">★1 (とりあえず)</option>
         </select>
       </div>
-      
       <div>
         <div class="field-label">URL (マイページ等)</div>
-        <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-hp" onchange="saveBasicInfo('hp', this.value)" placeholder="https://...">
+        <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-hp" onchange="saveBasicInfo('hp', this.value)">
       </div>
       <div>
         <div class="field-label">ログインID / 企業ID</div>
-        <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-login-id" onchange="saveBasicInfo('loginId', this.value)" placeholder="例：user1234">
+        <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-login-id" onchange="saveBasicInfo('loginId', this.value)">
       </div>
 
       <div>
@@ -382,10 +379,38 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 </main>
 </div>
 
+<div id="comment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
+  <div style="background:#fff; width:92%; max-width:600px; border-radius:12px; display:flex; flex-direction:column; height:85vh; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+    
+    <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:15px; font-weight:700; color:var(--text);" id="modal-title">添削・コメント</div>
+      <button onclick="closeCommentModal()" class="btn btn-ghost" style="font-size:16px; padding:4px 10px;">✕</button>
+    </div>
+    
+    <div style="padding:14px 20px; background:#FAFAF8; border-bottom:1px solid var(--border); max-height:140px; overflow-y:auto; flex-shrink:0;">
+      <div style="font-size:11px; font-weight:700; color:var(--text2); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+        📄 現在のテキスト <span style="font-weight:normal; font-size:10px; color:var(--text3);">(原案との比較用)</span>
+      </div>
+      <div id="modal-current-text" style="font-size:12px; line-height:1.6; color:var(--text); white-space:pre-wrap;"></div>
+    </div>
+
+    <div id="modal-chat-list" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; background:var(--bg);">
+      </div>
+
+    <div style="padding:16px 20px; border-top:1px solid var(--border); background:#fff; border-radius:0 0 12px 12px;">
+      <textarea id="modal-chat-input" placeholder="ここをこう修正してみては？ / こういう意図で書きました など..." style="width:100%; height:70px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:13px; resize:none; outline:none; margin-bottom:10px;"></textarea>
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="submitComment()" style="padding:8px 24px; font-weight:500;">送信する</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div id="toast">保存しました</div>
-<input type="file" id="import-input" accept=".json" style="display:none" onchange="doImport(event)">
 
 <script>
+// --- ★ここにご自身のIDとキーを再度入力してください ---
 const BIN_ID = '69d66d7436566621a88f7121';
 const API_KEY = '$2a$10$o0ckigFFVu0U9kEmzwnpduZygWWYhCMH9pl6oLENj393iJv/HbzhO';
 
@@ -395,11 +420,13 @@ const EXPECTED_PASSCODE = 'MORI';
 let state = null;
 let currentCompanyId = null;
 let saveTimer = null;
+let activeCommentTarget = null; // どの項目を添削中か
 
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth(); 
 
-const PHASES = ['未着手','ES作成中','ES提出済','書類選考中','一次面接','二次面接','最終面接','内定','不採用'];
+// ★フェーズに「最終面接待ち」を追加
+const PHASES = ['未着手','ES作成中','ES提出済','書類選考中','一次面接','二次面接','最終面接','最終面接待ち','内定','不採用'];
 const PHASE_COLORS = {
   '未着手':     {bg:'#F1F1EF',text:'#6B6B65',border:'#D0D0CB'},
   'ES作成中':   {bg:'#FEF3C7',text:'#92400E',border:'#FCD34D'},
@@ -408,6 +435,7 @@ const PHASE_COLORS = {
   '一次面接':   {bg:'#CFFAFE',text:'#155E75',border:'#67E8F9'},
   '二次面接':   {bg:'#E0F2FE',text:'#075985',border:'#7DD3FC'},
   '最終面接':   {bg:'#FFEDD5',text:'#9A3412',border:'#FCA5A1'},
+  '最終面接待ち':{bg:'#FEF08A',text:'#854D0E',border:'#FDE047'}, // 追加
   '内定':       {bg:'#DCFCE7',text:'#166534',border:'#86EFAC'},
   '不採用':     {bg:'#FEE2E2',text:'#991B1B',border:'#FCA5A5'},
 };
@@ -426,6 +454,7 @@ function defaultData() {
     selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:''},
     interview:{ qa:[], reverseQA:'' },
     research:{title:'',field:'',overview:'',tech:'',result:'',learning:''},
+    comments: {} // ★チャット履歴保存用
   };
 }
 
@@ -436,7 +465,9 @@ async function loadState() {
     });
     if (response.ok) {
       const data = await response.json();
-      return Object.keys(data.record).length > 0 ? data.record : defaultData();
+      let rec = Object.keys(data.record).length > 0 ? data.record : defaultData();
+      if (!rec.comments) rec.comments = {}; // 過去のデータ用マイグレーション
+      return rec;
     }
     return defaultData();
   } catch(e) {
@@ -489,7 +520,6 @@ function renderAll() {
   renderTable();
   renderCalendar();
   renderSelfAnalysis();
-  renderQAList();
 }
 
 function renderCalendar() {
@@ -619,7 +649,7 @@ function addCompany() {
   state.companies.push({
     id: newId, name: name.trim(), industry: '', interest: 3, phase: '未着手',
     esDeadline: '', esSubmitted: null, interview1: '', interview2: '', interviewFinal: '', offerStatus: null,
-    hp: '', loginId: '', // ←追加
+    hp: '', loginId: '',
     esQuestions:[], research:{overview:'',strength:'',news:'',motivation:'',benefits:'',obNotes:''}
   });
   saveState(); showDetail(newId);
@@ -658,8 +688,8 @@ function renderDetail() {
   
   document.getElementById('edit-industry').value = c.industry || '';
   document.getElementById('edit-interest').value = c.interest || 3;
-  document.getElementById('edit-hp').value = c.hp || ''; // ←追加
-  document.getElementById('edit-login-id').value = c.loginId || ''; // ←追加
+  document.getElementById('edit-hp').value = c.hp || '';
+  document.getElementById('edit-login-id').value = c.loginId || '';
 
   document.getElementById('edit-es-deadline').value = c.esDeadline || '';
   document.getElementById('edit-int-1').value = c.interview1 || '';
@@ -676,8 +706,6 @@ function saveBasicInfo(key, val) {
   c[key] = val;
   saveState();
   renderTable(); 
-  
-  // URLが変更されたらヘッダーのボタンも即座に更新する
   if(key === 'hp') {
     const hpEl = document.getElementById('detail-hp');
     hpEl.href = val || '#';
@@ -707,7 +735,8 @@ function renderStepper() {
     if (c.phase === p) {
       isActive = true;
     } else if (currentIdx > i) {
-      if (i <= 6 && (c.phase === '内定' || c.phase === '不採用')) {
+      // 内定・不採用の場合はそれ以前のすべて完了
+      if (i <= 7 && (c.phase === '内定' || c.phase === '不採用')) {
         isDone = true; 
       } else if (c.phase !== '不採用' && c.phase !== '内定') {
         isDone = true;
@@ -722,7 +751,7 @@ function renderStepper() {
     }
 
     let lineClass = 'step-line';
-    if (isDone || (isActive && i < 6)) lineClass += ' done';
+    if (isDone || (isActive && i < 7)) lineClass += ' done';
 
     let dotText = i + 1;
     if (p === '内定') dotText = '🎉';
@@ -756,14 +785,24 @@ function setPhase(phase) {
   renderStepper(); renderStats(); renderTable();
 }
 
+// === ES一覧の描画（添削ボタン付き） ===
 function renderESList() {
   const c = getCompany(); if (!c) return;
-  document.getElementById('es-list').innerHTML = c.esQuestions.map((q, i) => `
+  document.getElementById('es-list').innerHTML = c.esQuestions.map((q, i) => {
+    const cId = `es_${q.id}`;
+    const commentCount = state.comments[cId] ? state.comments[cId].length : 0;
+    const btnClass = commentCount > 0 ? "comment-btn has-comments" : "comment-btn";
+
+    return `
     <div class="es-question" style="position:relative; background: #FAFAF8; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 16px;">
-      <button onclick="deleteESQ(${i})" class="btn btn-ghost" style="position:absolute; top:8px; right:8px; color:#DC2626; padding:4px 8px; font-size:11px;">🗑 削除</button>
       
-      <div style="margin-bottom: 12px; padding-right: 60px;">
-        <div style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:6px;">設問 ${i+1}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; padding-right: 60px;">
+        <div style="font-size:12px; font-weight:700; color:var(--accent);">設問 ${i+1}</div>
+        <button onclick="openCommentModal('${cId}', '${c.name}の設問${i+1}')" class="${btnClass}">💬 添削 ${commentCount > 0 ? `(${commentCount})` : ''}</button>
+      </div>
+      <button onclick="deleteESQ(${i})" class="btn btn-ghost" style="position:absolute; top:12px; right:12px; color:#DC2626; padding:4px 8px; font-size:11px;">🗑 削除</button>
+      
+      <div style="margin-bottom: 12px;">
         <div class="editable editable-sm" contenteditable="true" onblur="saveESQ(${i}, 'q', this.textContent)" data-placeholder="（例）学生時代に最も力を入れたことはなんですか？">${q.q}</div>
       </div>
       
@@ -772,7 +811,7 @@ function renderESList() {
         <div class="editable es-answer" contenteditable="true" onblur="saveESQ(${i}, 'a', this.textContent)" data-placeholder="ここに回答を入力...">${q.a}</div>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 function deleteESQ(index) {
@@ -811,6 +850,7 @@ function saveSelfAnalysis(key, val) { state.selfAnalysis[key] = val; saveState()
 function saveResearchOverall(key, val) { state.research[key] = val; saveState(); }
 function saveInterviewReverseQA(val) { state.interview.reverseQA = val; saveState(); }
 
+// === 自己分析系の描画（添削ボタンの更新処理含む） ===
 function renderSelfAnalysis() {
   const els = document.querySelectorAll('[data-key^="selfAnalysis."]');
   els.forEach(el => {
@@ -823,44 +863,129 @@ function renderSelfAnalysis() {
     el.textContent = state.research[key] || '';
   });
   document.querySelector('[data-key="interview.reverseQA"]').textContent = state.interview.reverseQA || '';
+
+  // 添削ボタンのスタイルとカウント更新
+  updateCommentBtn('selfPR', 'btn-selfPR');
+  updateCommentBtn('gakuchika', 'btn-gakuchika');
+  updateCommentBtn('reverseQA', 'btn-reverseQA');
 }
 
-function renderQAList() {
-  document.getElementById('qa-list').innerHTML = state.interview.qa.map((q, i) => `
-    <div class="qa-item">
-      <div class="qa-q" contenteditable="true" onblur="saveQA(${i}, 'q', this.textContent)">${q.q}</div>
-      <div class="qa-a" contenteditable="true" onblur="saveQA(${i}, 'a', this.textContent)">${q.a}</div>
-    </div>
-  `).join('');
-}
-
-function saveQA(index, field, val) {
-  state.interview.qa[index][field] = val;
-  saveState();
-}
-
-function addQA() {
-  state.interview.qa.push({id:Date.now(), q:'よくある質問', a:''});
-  saveState(); renderQAList();
+function updateCommentBtn(targetId, btnId) {
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  const count = state.comments[targetId] ? state.comments[targetId].length : 0;
+  if(count > 0) {
+    btn.className = "comment-btn has-comments";
+    btn.textContent = `💬 添削 (${count})`;
+  } else {
+    btn.className = "comment-btn";
+    btn.textContent = `💬 添削`;
+  }
 }
 
 function switchTab(btn, tabId) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+tabId).classList.add('active');
 }
+
+// === 💬 添削・コメント機能 (Chat Modal) ===
+function openCommentModal(targetId, title) {
+  activeCommentTarget = targetId;
+  document.getElementById('modal-title').textContent = title + ' の添削';
+  
+  // 現在のテキストを取得して表示
+  let currentText = "（テキストがありません）";
+  if (targetId.startsWith('es_')) {
+    const esId = parseInt(targetId.replace('es_', ''));
+    const c = getCompany();
+    if(c) {
+      const q = c.esQuestions.find(x => x.id === esId);
+      if(q) currentText = q.a || "（回答が入力されていません）";
+    }
+  } else if (targetId === 'reverseQA') {
+    currentText = state.interview.reverseQA || "";
+  } else {
+    currentText = state.selfAnalysis[targetId] || "";
+  }
+  document.getElementById('modal-current-text').textContent = currentText;
+
+  renderComments();
+  document.getElementById('comment-modal').style.display = 'flex';
+}
+
+function closeCommentModal() {
+  document.getElementById('comment-modal').style.display = 'none';
+  activeCommentTarget = null;
+  // 閉じた時にボタンの数字を更新
+  if(currentCompanyId) renderESList();
+  renderSelfAnalysis();
+}
+
+function renderComments() {
+  const listEl = document.getElementById('modal-chat-list');
+  const thread = state.comments[activeCommentTarget] || [];
+  const myName = sessionStorage.getItem('shukatsu_author_name') || '';
+
+  if (thread.length === 0) {
+    listEl.innerHTML = '<div style="text-align:center; color:var(--text3); font-size:12px; margin-top:20px;">まだコメントはありません。最初の意見を投稿しましょう！</div>';
+    return;
+  }
+
+  listEl.innerHTML = thread.map(c => {
+    const isMe = c.author === myName;
+    const timeStr = new Date(c.timestamp).toLocaleString('ja-JP', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+    return `
+      <div class="chat-msg ${isMe ? 'mine' : 'others'}">
+        <div class="chat-info"><span>${c.author}</span><span>${timeStr}</span></div>
+        <div class="chat-bubble">${c.text}</div>
+      </div>
+    `;
+  }).join('');
+  
+  // 一番下へスクロール
+  setTimeout(() => { listEl.scrollTop = listEl.scrollHeight; }, 10);
+}
+
+function submitComment() {
+  const inputEl = document.getElementById('modal-chat-input');
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  // 名前の確認
+  let author = sessionStorage.getItem('shukatsu_author_name');
+  if (!author) {
+    author = prompt('誰からのコメントかわかるように、あなたのお名前（ニックネーム）を入力してください:');
+    if (!author || !author.trim()) return;
+    sessionStorage.setItem('shukatsu_author_name', author.trim());
+  }
+
+  if (!state.comments[activeCommentTarget]) {
+    state.comments[activeCommentTarget] = [];
+  }
+
+  state.comments[activeCommentTarget].push({
+    id: Date.now(),
+    author: author,
+    text: text,
+    timestamp: Date.now()
+  });
+
+  inputEl.value = '';
+  saveState();
+  renderComments();
+}
+
 function exportData() {
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'shukatsu.json'; a.click();
 }
 function importData() { document.getElementById('import-input').click(); }
-function doImport(e) { /* 省略 */ }
 
 async function initApp() {
   const isLoggedIn = sessionStorage.getItem('shukatsu_logged_in');
 
   if (!isLoggedIn) {
     const input = prompt('就活管理アプリにアクセスするためのパスコードを入力してください:');
-    
     if (input === EXPECTED_PASSCODE) {
       sessionStorage.setItem('shukatsu_logged_in', 'true');
     } else {
