@@ -24,8 +24,6 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.6; }
-
-/* Layout */
 #app { min-height: 100vh; }
 header { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .header-left { display: flex; align-items: center; gap: 16px; }
@@ -33,19 +31,12 @@ header { background: var(--card); border-bottom: 1px solid var(--border); paddin
 .header-stats { display: flex; gap: 16px; }
 .hstat { font-size: 12px; color: var(--text2); }
 .hstat b { color: var(--text); font-weight: 500; }
-
 main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 80px; }
-
-/* Views */
 .view { display: none; }
 .view.active { display: block; }
-
-/* Section */
 .section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
 .section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
 .section-title { font-size: 14px; font-weight: 700; }
-
-/* Buttons */
 .btn { border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--card); color: var(--text); padding: 6px 14px; font-size: 12px; font-family: var(--font); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
 .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
@@ -55,12 +46,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 80px; }
 .btn-back { display: flex; align-items: center; gap: 6px; font-size: 13px; }
 .btn-danger { color: #DC2626; border-color: #DC2626; }
 .btn-danger:hover { background: #FEF2F2; color: #B91C1C; border-color: #B91C1C; }
-
-/* Badges */
 .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
 .phase-badge { cursor: pointer; }
-
-/* Table */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 900px; }
 th { padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text2); border-bottom: 1px solid var(--border); white-space: nowrap; background: #FAFAF8; }
@@ -70,39 +57,27 @@ tbody tr { transition: background 0.1s; }
 tbody tr:hover { background: #FAFAF8; }
 .company-link { color: var(--accent); font-weight: 500; cursor: pointer; text-decoration: none; font-size: 13px; }
 .company-link:hover { text-decoration: underline; }
-
-/* Days remaining */
 .days-ok { color: #16A34A; font-weight: 500; font-size: 12px; }
 .days-warn { color: #D97706; font-weight: 500; font-size: 12px; }
 .days-urgent { color: #DC2626; font-weight: 700; font-size: 12px; }
 .days-past { color: var(--text3); font-size: 12px; }
-
-/* Editable fields */
 .editable { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; min-height: 72px; outline: none; font-family: var(--font); font-size: 13px; color: var(--text); line-height: 1.7; transition: border 0.15s; background: var(--card); }
 .editable:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(47,84,235,0.08); }
 .editable[data-placeholder]:empty::before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
 .editable-sm { min-height: 40px; }
-
-/* Tabs */
 .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 20px; }
 .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 12px 16px; font-size: 13px; color: var(--text2); cursor: pointer; font-family: var(--font); margin-bottom: -1px; transition: all 0.15s; white-space: nowrap; }
 .tab-btn:hover { color: var(--text); }
 .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
 .tab-content { display: none; padding: 20px; }
 .tab-content.active { display: block; }
-
-/* Grid */
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .span2 { grid-column: 1 / -1; }
 .field-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
-
-/* Summary cards */
 .stat-cards { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; padding: 20px; }
 .stat-card { background: var(--bg); border-radius: var(--radius-sm); padding: 14px; }
 .stat-card .val { font-size: 24px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
 .stat-card .lbl { font-size: 11px; color: var(--text2); }
-
-/* Phase stepper */
 .phase-stepper { display: flex; align-items: center; padding: 16px 20px; gap: 0; overflow-x: auto; }
 .step { display: flex; align-items: center; gap: 4px; }
 .step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border2); background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--text3); cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
@@ -112,26 +87,14 @@ tbody tr:hover { background: #FAFAF8; }
 .step-line { width: 24px; height: 2px; background: var(--border); flex-shrink: 0; transition: background 0.2s; }
 .step-line.done { background: #4CAF50; }
 .step-label { font-size: 10px; color: var(--text3); text-align: center; margin-top: 3px; white-space: nowrap; }
-
-/* Inline input */
 .inline-input { border: none; border-bottom: 1px solid transparent; outline: none; font-family: var(--font); font-size: 13px; color: var(--text); background: transparent; width: 100%; padding: 2px 4px; transition: border 0.15s; }
-
-/* Detail header */
 .detail-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .detail-company-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; cursor: pointer; text-decoration: underline dashed var(--border2); text-underline-offset: 6px; transition: color 0.2s; }
 .detail-company-name:hover { color: var(--accent); }
-
-/* Select */
 select.inline-select { border: 1px solid var(--border); border-radius: 4px; background: var(--card); color: var(--text); font-family: var(--font); font-size: 12px; padding: 3px 6px; outline: none; cursor: pointer; }
-
-/* Filter bar */
 .filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 20px; border-bottom: 1px solid var(--border); background: #FAFAF8; }
-
-/* Toast */
 #toast { position: fixed; bottom: 24px; right: 24px; background: #1A1A18; color: white; padding: 10px 16px; border-radius: var(--radius-sm); font-size: 12px; opacity: 0; transition: opacity 0.25s; z-index: 9999; pointer-events: none; }
 #toast.show { opacity: 1; }
-
-/* カレンダー */
 .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 0 16px; margin-bottom: 12px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .calendar-day-header { text-align: center; font-size: 11px; font-weight: 500; color: var(--text2); padding: 4px; }
@@ -146,19 +109,15 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 .event-int2 { background: #E0F2FE; color: #075985; border: 1px solid #7DD3FC; }
 .event-final { background: #FFEDD5; color: #9A3412; border: 1px solid #FCA5A1; }
 .event-general { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; }
-
-/* 添削用チャットUI */
 .comment-btn { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:12px; background:var(--bg); border:1px solid var(--border); color:var(--text2); cursor:pointer; font-weight:500; transition:0.2s; }
 .comment-btn:hover { background:var(--accent-bg); color:var(--accent); border-color:var(--accent); }
 .comment-btn.has-comments { background:#FFFBEB; border-color:#FDE68A; color:#B45309; }
-
 .chat-msg { margin-bottom:12px; display:flex; flex-direction:column; }
 .chat-info { font-size:10px; color:var(--text3); margin-bottom:2px; display:flex; justify-content:space-between; }
 .chat-bubble { background:#FAFAF8; padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:13px; line-height:1.5; white-space:pre-wrap; }
 .chat-msg.mine .chat-info { flex-direction:row-reverse; }
 .chat-msg.mine .chat-bubble { background:var(--accent-bg); border-color:#C7D2FE; color:#1E3A8A; align-self:flex-end; border-bottom-right-radius:0; }
 .chat-msg.others .chat-bubble { align-self:flex-start; border-bottom-left-radius:0; }
-
 @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } .stat-cards { grid-template-columns: repeat(2,1fr); } }
 </style>
 </head>
@@ -440,8 +399,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
       <span class="section-title">スケジュール設定</span>
       <button class="btn" onclick="addScheduleItem()">＋ 予定を追加</button>
     </div>
-    <div style="padding: 16px 20px;" id="company-schedule-list">
-    </div>
+    <div style="padding: 16px 20px;" id="company-schedule-list"></div>
   </div>
 
   <div class="section">
@@ -457,29 +415,23 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 
 <div id="comment-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
   <div style="background:#fff; width:92%; max-width:600px; border-radius:12px; display:flex; flex-direction:column; height:85vh; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-    
     <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
       <div style="font-size:15px; font-weight:700; color:var(--text);" id="modal-title">添削・コメント</div>
       <button onclick="closeCommentModal()" class="btn btn-ghost" style="font-size:16px; padding:4px 10px;">✕</button>
     </div>
-    
     <div style="padding:14px 20px; background:#FAFAF8; border-bottom:1px solid var(--border); max-height:140px; overflow-y:auto; flex-shrink:0;">
       <div style="font-size:11px; font-weight:700; color:var(--text2); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
         📄 現在のテキスト <span style="font-weight:normal; font-size:10px; color:var(--text3);">(原案との比較用)</span>
       </div>
       <div id="modal-current-text" style="font-size:12px; line-height:1.6; color:var(--text); white-space:pre-wrap;"></div>
     </div>
-
-    <div id="modal-chat-list" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; background:var(--bg);">
-    </div>
-
+    <div id="modal-chat-list" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; background:var(--bg);"></div>
     <div style="padding:16px 20px; border-top:1px solid var(--border); background:#fff; border-radius:0 0 12px 12px;">
       <textarea id="modal-chat-input" placeholder="ここをこう修正してみては？ / こういう意図で書きました など..." style="width:100%; height:70px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:13px; resize:none; outline:none; margin-bottom:10px;"></textarea>
       <div style="display:flex; justify-content:flex-end;">
         <button class="btn btn-primary" onclick="submitComment()" style="padding:8px 24px; font-weight:500;">送信する</button>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -488,16 +440,18 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 <script>
 const BIN_ID = '69d66d7436566621a88f7121';
 const API_KEY = '$2a$10$o0ckigFFVu0U9kEmzwnpduZygWWYhCMH9pl6oLENj393iJv/HbzhO';
-
-const EXPECTED_PASSCODE = 'MORI'; 
+const EXPECTED_PASSCODE = 'MORI';
 
 let state = null;
 let currentCompanyId = null;
 let saveTimer = null;
-let activeCommentTarget = null; 
+let activeCommentTarget = null;
 
 let currentYear = new Date().getFullYear();
-let currentMonth = new Date().getMonth(); 
+let currentMonth = new Date().getMonth();
+// ✅ Fix 1: tableSortMode が未宣言だったため renderTable() で ReferenceError が発生し、
+//           後続の renderCalendar() も実行されず両方とも表示されていなかった
+let tableSortMode = '';
 
 const PHASES = ['未着手','ES作成中','添削待ち','添削完了','ES提出済','書類選考中','一次面接','二次面接','三次面接','四次面接','最終面接','最終面接待ち','内定','不採用'];
 const PHASE_COLORS = {
@@ -520,11 +474,11 @@ const PHASE_COLORS = {
 function defaultData() {
   return {
     companies: [],
-    selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:'', qa:[]}, 
+    selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:'', qa:[]},
     interview:{ qa:[], reverseQA:'' },
     research:{title:'',field:'',overview:'',tech:'',result:'',learning:'', qa:[]},
-    generalEvents: [], 
-    comments: {} 
+    generalEvents: [],
+    comments: {}
   };
 }
 
@@ -536,12 +490,10 @@ async function loadState() {
     if (response.ok) {
       const data = await response.json();
       let rec = Object.keys(data.record).length > 0 ? data.record : defaultData();
-      
-      if (!rec.comments) rec.comments = {}; 
+      if (!rec.comments) rec.comments = {};
       if (!rec.selfAnalysis.qa) rec.selfAnalysis.qa = [];
       if (!rec.research.qa) rec.research.qa = [];
       if (!rec.generalEvents) rec.generalEvents = [];
-
       rec.companies.forEach(c => {
         if (!c.schedules) {
           c.schedules = [];
@@ -599,7 +551,6 @@ function renderAll() {
   renderAllTabs();
 }
 
-// === 追加した安全装置（ガード）関数 ===
 function getEsDeadline(c) {
   if(!c.schedules) return '';
   const sched = c.schedules.find(s => {
@@ -613,10 +564,16 @@ function getPhaseDate(c) {
   if(!c.schedules || !c.phase) return '—';
   const sched = c.schedules.find(s => {
     const t = s.title || '';
-    if (t.trim() === '') return false; // 空文字の場合はマッチさせない
+    if (t.trim() === '') return false;
     return t.includes(c.phase) || c.phase.includes(t);
   });
   return sched && sched.date ? sched.date : '—';
+}
+
+// ✅ Fix 2: sortTable 関数が定義されていなかったためボタンがエラーになっていた
+function sortTable(mode) {
+  tableSortMode = (tableSortMode === mode) ? '' : mode;
+  renderTable();
 }
 
 function renderTable() {
@@ -625,14 +582,14 @@ function renderTable() {
 
   let cos = state.companies.filter(c => {
     const matchPhase = phaseFilter === "" || c.phase === phaseFilter;
-    const compName = c.name || ''; // nameがない場合の安全装置
+    const compName = c.name || '';
     const matchSearch = searchFilter === "" || compName.toLowerCase().includes(searchFilter);
     return matchPhase && matchSearch;
   });
 
   if (tableSortMode === 'deadline') cos.sort((a,b) => new Date(getEsDeadline(a)||'9999-12-31') - new Date(getEsDeadline(b)||'9999-12-31'));
   if (tableSortMode === 'interest') cos.sort((a,b) => (b.interest || 0) - (a.interest || 0));
-  
+
   const tbody = document.getElementById('table-body');
   tbody.innerHTML = cos.map(c => {
     const esDeadline = getEsDeadline(c);
@@ -640,7 +597,6 @@ function renderTable() {
     const isEsSubmitted = c.esSubmitted || PHASES.indexOf(c.phase) >= PHASES.indexOf('ES提出済');
     const isOffer = c.phase === '内定';
     const isFail = c.phase === '不採用';
-
     return `<tr>
       <td><span class="company-link" onclick="showDetail(${c.id})">${c.name || '名称未設定'}</span></td>
       <td style="color:var(--text2)">${c.industry||'—'}</td>
@@ -663,7 +619,6 @@ function renderCompanySchedules() {
     listEl.innerHTML = '<div style="color:var(--text3); font-size:12px;">予定がありません。「＋ 予定を追加」ボタンから追加してください。</div>';
     return;
   }
-  
   listEl.innerHTML = c.schedules.map((s, i) => `
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
       <input type="text" class="editable editable-sm" style="flex:1; border:1px solid var(--border);" value="${s.title || ''}" onchange="saveScheduleItem(${i}, 'title', this.value)" placeholder="例: 一次面接, 会社説明会, ES締切">
@@ -697,7 +652,6 @@ function addGeneralEvent() {
   if(!title) return;
   const dateStr = prompt('日付を「YYYY-MM-DD」形式で入力してください\n※例：2026-05-10', `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-01`);
   if(!dateStr) return;
-  
   if(!state.generalEvents) state.generalEvents = [];
   state.generalEvents.push({ id: Date.now(), title, date: dateStr });
   saveState(); renderCalendar();
@@ -715,17 +669,13 @@ function renderCalendar() {
   if(!grid) return;
   const label = document.getElementById('calendar-month-label');
   label.textContent = `${currentYear}年 ${currentMonth + 1}月`;
-
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const today = new Date();
-
   let html = '';
   const dayNames = ['日','月','火','水','木','金','土'];
   dayNames.forEach(d => html += `<div class="calendar-day-header">${d}</div>`);
-
   const events = {};
-  
   state.companies.forEach(c => {
     if(c.schedules) {
       c.schedules.forEach(s => {
@@ -740,20 +690,16 @@ function renderCalendar() {
       });
     }
   });
-
   if(state.generalEvents) {
     state.generalEvents.forEach(g => {
       if(g.date) addEvent(events, g.date, g.title, 'event-general', null, g.id);
     });
   }
-
   for(let i = 0; i < firstDay; i++) html += `<div class="calendar-day other-month"></div>`;
-
   for(let i = 1; i <= daysInMonth; i++) {
     const isToday = today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === i;
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
     const dayEvents = events[dateStr] || [];
-
     let eventHtml = dayEvents.map(e => {
       if (e.id) {
         return `<div class="event-badge ${e.cls}" onclick="showDetail(${e.id}); event.stopPropagation();" title="${e.name}">${e.name}</div>`;
@@ -761,7 +707,6 @@ function renderCalendar() {
         return `<div class="event-badge ${e.cls}" onclick="clickGeneralEvent(${e.genId}); event.stopPropagation();" title="${e.name}">${e.name}</div>`;
       }
     }).join('');
-
     html += `<div class="calendar-day ${isToday ? 'today' : ''}"><div class="calendar-date">${i}</div>${eventHtml}</div>`;
   }
   grid.innerHTML = html;
@@ -778,7 +723,6 @@ function nextMonth() { currentMonth++; if(currentMonth > 11) { currentMonth = 0;
 function renderRecentComments() {
   const container = document.getElementById('recent-comments');
   let allComments = [];
-
   const fieldNames = {
     'selfPR':'自己PR', 'gakuchika':'ガクチカ', 'strength':'長所', 'weakness':'短所',
     'career':'キャリアビジョン', 'values':'働く上で大切にしたいこと',
@@ -786,44 +730,35 @@ function renderRecentComments() {
     'title':'研究タイトル', 'field':'研究分野', 'overview':'研究概要',
     'tech':'使用技術', 'result':'研究成果', 'learning':'研究で得たこと'
   };
-
   for (const targetId in state.comments) {
     const thread = state.comments[targetId];
     let targetName = ''; let companyName = '';
-    
-    if (fieldNames[targetId]) { targetName = fieldNames[targetId]; } 
+    if (fieldNames[targetId]) { targetName = fieldNames[targetId]; }
     else if (targetId.startsWith('es_')) {
       const esId = parseInt(targetId.replace('es_', ''));
       let found = false;
       for (const c of state.companies) {
         const qIdx = c.esQuestions.findIndex(q => q.id === esId);
-        if (qIdx !== -1) {
-          companyName = c.name; targetName = `設問${qIdx + 1}`; found = true; break;
-        }
+        if (qIdx !== -1) { companyName = c.name; targetName = `設問${qIdx + 1}`; found = true; break; }
       }
-      if(!found) continue; 
-    } else if (targetId.startsWith('self_qa_')) { targetName = '自己分析(追加設問)'; } 
-      else if (targetId.startsWith('int_qa_')) { targetName = '面接対策(Q&A)'; } 
+      if(!found) continue;
+    } else if (targetId.startsWith('self_qa_')) { targetName = '自己分析(追加設問)'; }
+      else if (targetId.startsWith('int_qa_')) { targetName = '面接対策(Q&A)'; }
       else if (targetId.startsWith('res_qa_')) { targetName = '研究概要(追加設問)'; }
-
     thread.forEach(c => allComments.push({ ...c, targetId, companyName, targetName }));
   }
-
   allComments.sort((a, b) => b.timestamp - a.timestamp);
   const recent = allComments.slice(0, 10);
-
   if (recent.length === 0) {
     container.innerHTML = '<div style="text-align:center; color:var(--text3); font-size:12px; padding:10px 0;">まだ添削・コメントはありません</div>';
     return;
   }
-
   container.innerHTML = recent.map(c => {
     const d = new Date(c.timestamp);
     const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    const badge = c.companyName 
-      ? `<span class="badge" style="background:var(--accent-bg); color:var(--accent); border:1px solid #C7D2FE;">${c.companyName}</span>` 
+    const badge = c.companyName
+      ? `<span class="badge" style="background:var(--accent-bg); color:var(--accent); border:1px solid #C7D2FE;">${c.companyName}</span>`
       : `<span class="badge" style="background:#F3F4F6; color:#4B5563; border:1px solid #E5E7EB;">共通項目</span>`;
-    
     return `
       <div style="border-bottom: 1px solid var(--border); padding: 10px 0; display:flex; flex-direction:column; gap:4px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#F1F1EF'" onmouseout="this.style.background='transparent'" onclick="jumpToComment('${c.targetId}', ${c.companyName ? `'${c.companyName}'` : 'null'})">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -860,7 +795,6 @@ function renderStats() {
   const esSubmittedCount = cos.filter(c => c.esSubmitted || PHASES.indexOf(c.phase) >= PHASES.indexOf('ES提出済')).length;
   const activeCount = cos.filter(c => !['未着手','内定','不採用'].includes(c.phase)).length;
   const offerCount = cos.filter(c => c.phase === '内定').length;
-
   document.getElementById('stat-cards').innerHTML = `
     <div class="stat-card"><div class="val">${entryCount}</div><div class="lbl">エントリー数</div></div>
     <div class="stat-card"><div class="val" style="color:#2563EB">${esSubmittedCount}</div><div class="lbl">ES提出済</div></div>
@@ -921,7 +855,7 @@ function deleteCompany() {
   const c = getCompany(); if (!c) return;
   if (confirm(`本当に「${c.name}」を一覧から削除しますか？\nこの操作は取り消せません。`)) {
     state.companies = state.companies.filter(comp => comp.id !== c.id);
-    saveState(); showHome(); 
+    saveState(); showHome();
   }
 }
 
@@ -931,15 +865,12 @@ function renderDetail() {
   const c = getCompany(); if (!c) return;
   document.getElementById('detail-name').textContent = c.name;
   document.getElementById('detail-phase-badge').innerHTML = phaseBadge(c.phase);
-  
   const hpEl = document.getElementById('detail-hp');
   hpEl.href = c.hp || '#'; hpEl.style.display = c.hp ? '' : 'none';
-  
   document.getElementById('edit-industry').value = c.industry || '';
   document.getElementById('edit-interest').value = c.interest || 3;
   document.getElementById('edit-hp').value = c.hp || '';
   document.getElementById('edit-login-id').value = c.loginId || '';
-
   renderStepper();
   renderCompanySchedules();
   renderESList();
@@ -947,7 +878,7 @@ function renderDetail() {
 
 function saveBasicInfo(key, val) {
   const c = getCompany(); if(!c) return;
-  c[key] = val; saveState(); renderTable(); 
+  c[key] = val; saveState(); renderTable();
   if(key === 'hp') {
     const hpEl = document.getElementById('detail-hp');
     hpEl.href = val || '#'; hpEl.style.display = val ? '' : 'none';
@@ -959,13 +890,12 @@ function renderStepper() {
   const currentIdx = PHASES.indexOf(c.phase);
   const failIdx = PHASES.indexOf('不採用');
   const offerIdx = PHASES.indexOf('内定');
-  
   let html = '<div style="display:flex;align-items:flex-start;gap:0;">';
   PHASES.forEach((p, i) => {
     let dotClass = 'step-dot'; let isDone = false; let isActive = false; let extraStyle = '';
-    if (c.phase === p) { isActive = true; } 
+    if (c.phase === p) { isActive = true; }
     else if (currentIdx > i) {
-      if ((c.phase === '内定' || c.phase === '不採用') && i < Math.min(failIdx, offerIdx)) { isDone = true; } 
+      if ((c.phase === '内定' || c.phase === '不採用') && i < Math.min(failIdx, offerIdx)) { isDone = true; }
       else if (c.phase !== '不採用' && c.phase !== '内定') { isDone = true; }
     }
     if (isDone) dotClass += ' done';
@@ -976,10 +906,8 @@ function renderStepper() {
     }
     let lineClass = 'step-line';
     if (isDone || (isActive && i < Math.min(failIdx, offerIdx))) lineClass += ' done';
-
     let dotText = i + 1;
     if (p === '内定') dotText = '🎉'; if (p === '不採用') dotText = '×';
-
     html += `<div style="display:flex;flex-direction:column;align-items:center;">
       <div style="display:flex;align-items:center;">
         <div class="${dotClass}" style="${extraStyle}" onclick="setPhase('${p}')" title="${p}">${dotText}</div>
@@ -994,7 +922,7 @@ function renderStepper() {
 
 function setPhase(phase) {
   const c = getCompany(); if (!c) return;
-  c.phase = phase; 
+  c.phase = phase;
   c.esSubmitted = PHASES.indexOf(phase) >= PHASES.indexOf('ES提出済');
   if (phase === '内定') c.offerStatus = true;
   else if (phase === '不採用') c.offerStatus = false;
@@ -1009,7 +937,6 @@ function renderDynamicQA(listData, containerId, idPrefix, titlePrefix, type) {
     const cId = `${idPrefix}_${q.id}`;
     const commentCount = state.comments[cId] ? state.comments[cId].length : 0;
     const btnClass = commentCount > 0 ? "comment-btn has-comments" : "comment-btn";
-
     return `
     <div class="es-question" style="position:relative; background: #FAFAF8; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; padding-right: 60px;">
@@ -1017,7 +944,6 @@ function renderDynamicQA(listData, containerId, idPrefix, titlePrefix, type) {
         <button onclick="openCommentModal('${cId}', '${titlePrefix}${i+1}')" class="${btnClass}">💬 添削 ${commentCount > 0 ? `(${commentCount})` : ''}</button>
       </div>
       <button onclick="deleteDynamicQA('${type}', ${i})" class="btn btn-ghost" style="position:absolute; top:12px; right:12px; color:#DC2626; padding:4px 8px; font-size:11px;">🗑 削除</button>
-      
       <div style="margin-bottom: 12px;">
         <div class="editable editable-sm" contenteditable="true" onblur="saveDynamicQA('${type}', ${i}, 'q', this.textContent)" data-placeholder="設問を入力...">${q.q}</div>
       </div>
@@ -1047,10 +973,8 @@ function renderAllTabs() {
     el.textContent = state.research[key] || '';
   });
   document.querySelector('[data-key="interview.reverseQA"]').textContent = state.interview.reverseQA || '';
-
   const basicFields = ['selfPR', 'gakuchika', 'strength', 'weakness', 'career', 'values','reverseQA', 'title', 'field', 'overview', 'tech', 'result', 'learning'];
   basicFields.forEach(f => updateCommentBtn(f, `btn-${f}`));
-
   renderDynamicQA(state.selfAnalysis.qa, 'self-qa-list', 'self_qa', '追加設問', 'selfAnalysis');
   renderDynamicQA(state.interview.qa, 'int-qa-list', 'int_qa', 'Q&A', 'interview');
   renderDynamicQA(state.research.qa, 'res-qa-list', 'res_qa', '追加設問', 'research');
@@ -1060,7 +984,7 @@ function updateCommentBtn(targetId, btnId) {
   const btn = document.getElementById(btnId);
   if(!btn) return;
   const count = state.comments[targetId] ? state.comments[targetId].length : 0;
-  if(count > 0) { btn.className = "comment-btn has-comments"; btn.innerHTML = `💬 添削 (${count})`; } 
+  if(count > 0) { btn.className = "comment-btn has-comments"; btn.innerHTML = `💬 添削 (${count})`; }
   else { btn.className = "comment-btn"; btn.innerHTML = `💬 添削`; }
 }
 
@@ -1099,9 +1023,7 @@ function switchTab(btn, tabId) {
 function openCommentModal(targetId, title) {
   activeCommentTarget = targetId;
   document.getElementById('modal-title').textContent = title + ' の添削';
-  
   let currentText = "（テキストがありません）";
-  
   if (targetId.startsWith('es_')) {
     const esId = parseInt(targetId.replace('es_', ''));
     const c = getCompany();
@@ -1118,12 +1040,10 @@ function openCommentModal(targetId, title) {
   } else if (targetId.startsWith('res_qa_')) {
     const q = state.research.qa.find(x => x.id === parseInt(targetId.replace('res_qa_', '')));
     if(q) currentText = `【設問】\n${q.q}\n\n【回答】\n${q.a}`;
-  } else if (targetId === 'reverseQA') { currentText = state.interview.reverseQA || ""; } 
-    else if (state.selfAnalysis[targetId] !== undefined) { currentText = state.selfAnalysis[targetId] || ""; } 
+  } else if (targetId === 'reverseQA') { currentText = state.interview.reverseQA || ""; }
+    else if (state.selfAnalysis[targetId] !== undefined) { currentText = state.selfAnalysis[targetId] || ""; }
     else if (state.research[targetId] !== undefined) { currentText = state.research[targetId] || ""; }
-  
   document.getElementById('modal-current-text').textContent = currentText;
-
   renderComments();
   document.getElementById('comment-modal').style.display = 'flex';
 }
@@ -1138,12 +1058,10 @@ function renderComments() {
   const listEl = document.getElementById('modal-chat-list');
   const thread = state.comments[activeCommentTarget] || [];
   const myName = sessionStorage.getItem('shukatsu_author_name') || '';
-
   if (thread.length === 0) {
     listEl.innerHTML = '<div style="text-align:center; color:var(--text3); font-size:12px; margin-top:20px;">まだコメントはありません。最初の意見を投稿しましょう！</div>';
     return;
   }
-
   listEl.innerHTML = thread.map(c => {
     const isMe = c.author === myName;
     const d = new Date(c.timestamp);
@@ -1162,18 +1080,15 @@ function submitComment() {
   const inputEl = document.getElementById('modal-chat-input');
   const text = inputEl.value.trim();
   if (!text) return;
-
   let author = sessionStorage.getItem('shukatsu_author_name');
   if (!author) {
     author = prompt('誰からのコメントかわかるように、あなたのお名前（ニックネーム）を入力してください:');
     if (!author || !author.trim()) return;
     sessionStorage.setItem('shukatsu_author_name', author.trim());
   }
-
   if (!state.comments[activeCommentTarget]) state.comments[activeCommentTarget] = [];
   state.comments[activeCommentTarget].push({ id: Date.now(), author: author, text: text, timestamp: Date.now() });
-
-  inputEl.value = ''; saveState(); renderComments(); renderRecentComments(); 
+  inputEl.value = ''; saveState(); renderComments(); renderRecentComments();
 }
 
 function exportData() {
@@ -1186,7 +1101,7 @@ async function initApp() {
   const isLoggedIn = sessionStorage.getItem('shukatsu_logged_in');
   if (!isLoggedIn) {
     const input = prompt('就活管理アプリにアクセスするためのパスコードを入力してください:');
-    if (input === EXPECTED_PASSCODE) { sessionStorage.setItem('shukatsu_logged_in', 'true'); } 
+    if (input === EXPECTED_PASSCODE) { sessionStorage.setItem('shukatsu_logged_in', 'true'); }
     else {
       document.body.innerHTML = '<div style="padding:40px; text-align:center; font-size:16px;">パスコードが違います。<br>ページを再読み込みしてやり直してください。</div>';
       return;
