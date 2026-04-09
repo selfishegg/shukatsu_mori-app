@@ -83,11 +83,6 @@ tbody tr:hover { background: #FAFAF8; }
 .editable[data-placeholder]:empty::before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
 .editable-sm { min-height: 40px; }
 
-/* Char counter */
-.char-wrap { position: relative; }
-.char-count { position: absolute; bottom: 6px; right: 8px; font-size: 10px; color: var(--text3); pointer-events: none; }
-.char-count.over { color: #DC2626; }
-
 /* Tabs */
 .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 20px; }
 .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 12px 16px; font-size: 13px; color: var(--text2); cursor: pointer; font-family: var(--font); margin-bottom: -1px; transition: all 0.15s; white-space: nowrap; }
@@ -178,6 +173,10 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     <span class="app-title">就活管理</span>
     <div class="header-stats" id="header-stats"></div>
   </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn" onclick="exportData()">エクスポート</button>
+    <button class="btn" onclick="importData()">インポート</button>
+  </div>
 </header>
 
 <main>
@@ -189,6 +188,13 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
       <button class="btn btn-primary" onclick="addCompany()">＋ 企業を追加</button>
     </div>
     <div class="stat-cards" id="stat-cards"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">💬 最新の添削・コメント</span>
+    </div>
+    <div id="recent-comments" style="padding: 12px 20px; background: #FAFAF8;"></div>
   </div>
 
   <div class="section">
@@ -217,10 +223,20 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
       <span class="filter-label">フィルター：</span>
       <select class="inline-select" id="filter-phase" onchange="renderTable()">
         <option value="">すべて</option>
-        <option>未着手</option><option>ES作成中</option><option>ES提出済</option>
-        <option>書類選考中</option><option>一次面接</option><option>二次面接</option>
-        <option>最終面接</option><option>最終面接待ち</option><option>内定</option><option>不採用</option>
+        <option>未着手</option>
+        <option>ES作成中</option>
+        <option>添削待ち</option>
+        <option>添削完了</option>
+        <option>ES提出済</option>
+        <option>書類選考中</option>
+        <option>一次面接</option>
+        <option>二次面接</option>
+        <option>最終面接</option>
+        <option>最終面接待ち</option>
+        <option>内定</option>
+        <option>不採用</option>
       </select>
+      <input type="text" class="inline-input" id="filter-search" placeholder="企業名を検索..." oninput="renderTable()" style="width:160px;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:12px;">
     </div>
     <div class="table-wrap">
       <table>
@@ -420,22 +436,24 @@ const EXPECTED_PASSCODE = 'MORI';
 let state = null;
 let currentCompanyId = null;
 let saveTimer = null;
-let activeCommentTarget = null; // どの項目を添削中か
+let activeCommentTarget = null; 
 
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth(); 
 
-// ★フェーズに「最終面接待ち」を追加
-const PHASES = ['未着手','ES作成中','ES提出済','書類選考中','一次面接','二次面接','最終面接','最終面接待ち','内定','不採用'];
+// ★フェーズに「添削待ち」「添削完了」「最終面接待ち」を追加
+const PHASES = ['未着手','ES作成中','添削待ち','添削完了','ES提出済','書類選考中','一次面接','二次面接','最終面接','最終面接待ち','内定','不採用'];
 const PHASE_COLORS = {
   '未着手':     {bg:'#F1F1EF',text:'#6B6B65',border:'#D0D0CB'},
   'ES作成中':   {bg:'#FEF3C7',text:'#92400E',border:'#FCD34D'},
+  '添削待ち':   {bg:'#FFE4E6',text:'#9F1239',border:'#FDA4AF'},
+  '添削完了':   {bg:'#E0E7FF',text:'#1E40AF',border:'#93C5FD'},
   'ES提出済':   {bg:'#DBEAFE',text:'#1E40AF',border:'#93C5FD'},
   '書類選考中': {bg:'#EDE9FE',text:'#5B21B6',border:'#C4B5FD'},
   '一次面接':   {bg:'#CFFAFE',text:'#155E75',border:'#67E8F9'},
   '二次面接':   {bg:'#E0F2FE',text:'#075985',border:'#7DD3FC'},
   '最終面接':   {bg:'#FFEDD5',text:'#9A3412',border:'#FCA5A1'},
-  '最終面接待ち':{bg:'#FEF08A',text:'#854D0E',border:'#FDE047'}, // 追加
+  '最終面接待ち':{bg:'#FEF08A',text:'#854D0E',border:'#FDE047'},
   '内定':       {bg:'#DCFCE7',text:'#166534',border:'#86EFAC'},
   '不採用':     {bg:'#FEE2E2',text:'#991B1B',border:'#FCA5A5'},
 };
@@ -454,7 +472,7 @@ function defaultData() {
     selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:''},
     interview:{ qa:[], reverseQA:'' },
     research:{title:'',field:'',overview:'',tech:'',result:'',learning:''},
-    comments: {} // ★チャット履歴保存用
+    comments: {} // チャット履歴保存用
   };
 }
 
@@ -466,7 +484,7 @@ async function loadState() {
     if (response.ok) {
       const data = await response.json();
       let rec = Object.keys(data.record).length > 0 ? data.record : defaultData();
-      if (!rec.comments) rec.comments = {}; // 過去のデータ用マイグレーション
+      if (!rec.comments) rec.comments = {}; 
       return rec;
     }
     return defaultData();
@@ -517,9 +535,91 @@ function showDetail(id) {
 
 function renderAll() {
   renderStats();
+  renderRecentComments(); // 追加：ダッシュボード履歴
   renderTable();
   renderCalendar();
   renderSelfAnalysis();
+}
+
+// === 追加：最新の添削履歴を表示 ===
+function renderRecentComments() {
+  const container = document.getElementById('recent-comments');
+  let allComments = [];
+
+  for (const targetId in state.comments) {
+    const thread = state.comments[targetId];
+    let targetName = '';
+    let companyName = '';
+    
+    if (targetId === 'selfPR') targetName = '自己PR';
+    else if (targetId === 'gakuchika') targetName = 'ガクチカ';
+    else if (targetId === 'reverseQA') targetName = '逆質問リスト';
+    else if (targetId.startsWith('es_')) {
+      const esId = parseInt(targetId.replace('es_', ''));
+      let found = false;
+      for (const c of state.companies) {
+        const qIdx = c.esQuestions.findIndex(q => q.id === esId);
+        if (qIdx !== -1) {
+          companyName = c.name;
+          targetName = `設問${qIdx + 1}`;
+          found = true;
+          break;
+        }
+      }
+      if(!found) continue; 
+    }
+
+    thread.forEach(c => {
+      allComments.push({ ...c, targetId, companyName, targetName });
+    });
+  }
+
+  // 最新順にソートして10件表示
+  allComments.sort((a, b) => b.timestamp - a.timestamp);
+  const recent = allComments.slice(0, 10);
+
+  if (recent.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:var(--text3); font-size:12px; padding:10px 0;">まだ添削・コメントはありません</div>';
+    return;
+  }
+
+  container.innerHTML = recent.map(c => {
+    const d = new Date(c.timestamp);
+    const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const badge = c.companyName 
+      ? `<span class="badge" style="background:var(--accent-bg); color:var(--accent); border:1px solid #C7D2FE;">${c.companyName}</span>` 
+      : `<span class="badge" style="background:#F3F4F6; color:#4B5563; border:1px solid #E5E7EB;">共通項目</span>`;
+    
+    return `
+      <div style="border-bottom: 1px solid var(--border); padding: 10px 0; display:flex; flex-direction:column; gap:4px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#F1F1EF'" onmouseout="this.style.background='transparent'" onclick="jumpToComment('${c.targetId}', ${c.companyName ? `'${c.companyName}'` : 'null'})">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${badge}
+            <span style="font-size:12px; font-weight:700;">${c.targetName}</span>
+          </div>
+          <span style="font-size:11px; color:var(--text3);">${timeStr}</span>
+        </div>
+        <div style="font-size:12px; color:var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; padding-left:2px;">
+          <strong style="color:var(--text2);">${c.author}:</strong> ${c.text}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function jumpToComment(targetId, companyName) {
+  if (companyName) {
+    const c = state.companies.find(comp => comp.name === companyName);
+    if (c) {
+      showDetail(c.id);
+      openCommentModal(targetId, `${c.name}の${targetId.startsWith('es_') ? '設問' : targetId}`);
+    }
+  } else {
+    showHome();
+    if(targetId === 'reverseQA') switchTab(document.querySelector('.tab-btn:nth-child(2)'), 'interview');
+    else switchTab(document.querySelector('.tab-btn:nth-child(1)'), 'self');
+    openCommentModal(targetId, targetId === 'selfPR' ? '自己PR' : targetId === 'gakuchika' ? 'ガクチカ' : '逆質問リスト');
+  }
 }
 
 function renderCalendar() {
@@ -578,7 +678,7 @@ function nextMonth() { currentMonth++; if(currentMonth > 11) { currentMonth = 0;
 function renderStats() {
   const cos = state.companies;
   const entryCount = cos.length;
-  const esSubmittedCount = cos.filter(c => c.esSubmitted || PHASES.indexOf(c.phase) >= 2).length;
+  const esSubmittedCount = cos.filter(c => c.esSubmitted || PHASES.indexOf(c.phase) >= PHASES.indexOf('ES提出済')).length;
   const activeCount = cos.filter(c => !['未着手','内定','不採用'].includes(c.phase)).length;
   const offerCount = cos.filter(c => c.phase === '内定').length;
 
@@ -615,14 +715,23 @@ function phaseBadge(phase) {
 let tableSortMode = null;
 function sortTable(mode) { tableSortMode = mode; renderTable(); }
 
+// === 変更：表のフィルター機能修正 ===
 function renderTable() {
-  let cos = [...state.companies];
+  const phaseFilter = document.getElementById('filter-phase').value;
+  const searchFilter = document.getElementById('filter-search').value.toLowerCase();
+
+  let cos = state.companies.filter(c => {
+    const matchPhase = phaseFilter === "" || c.phase === phaseFilter;
+    const matchSearch = searchFilter === "" || c.name.toLowerCase().includes(searchFilter);
+    return matchPhase && matchSearch;
+  });
+
   if (tableSortMode === 'deadline') cos.sort((a,b) => new Date(a.esDeadline||'9999-12-31') - new Date(b.esDeadline||'9999-12-31'));
   if (tableSortMode === 'interest') cos.sort((a,b) => (b.interest || 0) - (a.interest || 0));
   
   const tbody = document.getElementById('table-body');
   tbody.innerHTML = cos.map(c => {
-    const isEsSubmitted = c.esSubmitted || PHASES.indexOf(c.phase) >= 2;
+    const isEsSubmitted = c.esSubmitted || PHASES.indexOf(c.phase) >= PHASES.indexOf('ES提出済');
     const isOffer = c.phase === '内定';
     const isFail = c.phase === '不採用';
 
@@ -664,6 +773,7 @@ function editCompanyName() {
     document.getElementById('detail-name').textContent = c.name;
     renderTable();
     renderCalendar();
+    renderRecentComments(); // 企業名が変わったので履歴も更新
   }
 }
 
@@ -724,6 +834,8 @@ function saveSchedule(key, val) {
 function renderStepper() {
   const c = getCompany(); if (!c) return;
   const currentIdx = PHASES.indexOf(c.phase);
+  const failIdx = PHASES.indexOf('不採用');
+  const offerIdx = PHASES.indexOf('内定');
   
   let html = '<div style="display:flex;align-items:flex-start;gap:0;">';
   PHASES.forEach((p, i) => {
@@ -735,8 +847,7 @@ function renderStepper() {
     if (c.phase === p) {
       isActive = true;
     } else if (currentIdx > i) {
-      // 内定・不採用の場合はそれ以前のすべて完了
-      if (i <= 7 && (c.phase === '内定' || c.phase === '不採用')) {
+      if ((c.phase === '内定' || c.phase === '不採用') && i < Math.min(failIdx, offerIdx)) {
         isDone = true; 
       } else if (c.phase !== '不採用' && c.phase !== '内定') {
         isDone = true;
@@ -751,7 +862,7 @@ function renderStepper() {
     }
 
     let lineClass = 'step-line';
-    if (isDone || (isActive && i < 7)) lineClass += ' done';
+    if (isDone || (isActive && i < Math.min(failIdx, offerIdx))) lineClass += ' done';
 
     let dotText = i + 1;
     if (p === '内定') dotText = '🎉';
@@ -774,7 +885,7 @@ function setPhase(phase) {
   c.phase = phase; 
   
   const pIdx = PHASES.indexOf(phase);
-  c.esSubmitted = pIdx >= 2;
+  c.esSubmitted = pIdx >= PHASES.indexOf('ES提出済');
   
   if (phase === '内定') c.offerStatus = true;
   else if (phase === '不採用') c.offerStatus = false;
@@ -785,7 +896,6 @@ function setPhase(phase) {
   renderStepper(); renderStats(); renderTable();
 }
 
-// === ES一覧の描画（添削ボタン付き） ===
 function renderESList() {
   const c = getCompany(); if (!c) return;
   document.getElementById('es-list').innerHTML = c.esQuestions.map((q, i) => {
@@ -850,7 +960,6 @@ function saveSelfAnalysis(key, val) { state.selfAnalysis[key] = val; saveState()
 function saveResearchOverall(key, val) { state.research[key] = val; saveState(); }
 function saveInterviewReverseQA(val) { state.interview.reverseQA = val; saveState(); }
 
-// === 自己分析系の描画（添削ボタンの更新処理含む） ===
 function renderSelfAnalysis() {
   const els = document.querySelectorAll('[data-key^="selfAnalysis."]');
   els.forEach(el => {
@@ -864,7 +973,6 @@ function renderSelfAnalysis() {
   });
   document.querySelector('[data-key="interview.reverseQA"]').textContent = state.interview.reverseQA || '';
 
-  // 添削ボタンのスタイルとカウント更新
   updateCommentBtn('selfPR', 'btn-selfPR');
   updateCommentBtn('gakuchika', 'btn-gakuchika');
   updateCommentBtn('reverseQA', 'btn-reverseQA');
@@ -888,12 +996,11 @@ function switchTab(btn, tabId) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+tabId).classList.add('active');
 }
 
-// === 💬 添削・コメント機能 (Chat Modal) ===
+// === 💬 添削・コメント機能 ===
 function openCommentModal(targetId, title) {
   activeCommentTarget = targetId;
   document.getElementById('modal-title').textContent = title + ' の添削';
   
-  // 現在のテキストを取得して表示
   let currentText = "（テキストがありません）";
   if (targetId.startsWith('es_')) {
     const esId = parseInt(targetId.replace('es_', ''));
@@ -916,7 +1023,6 @@ function openCommentModal(targetId, title) {
 function closeCommentModal() {
   document.getElementById('comment-modal').style.display = 'none';
   activeCommentTarget = null;
-  // 閉じた時にボタンの数字を更新
   if(currentCompanyId) renderESList();
   renderSelfAnalysis();
 }
@@ -933,7 +1039,8 @@ function renderComments() {
 
   listEl.innerHTML = thread.map(c => {
     const isMe = c.author === myName;
-    const timeStr = new Date(c.timestamp).toLocaleString('ja-JP', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+    const d = new Date(c.timestamp);
+    const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     return `
       <div class="chat-msg ${isMe ? 'mine' : 'others'}">
         <div class="chat-info"><span>${c.author}</span><span>${timeStr}</span></div>
@@ -942,7 +1049,6 @@ function renderComments() {
     `;
   }).join('');
   
-  // 一番下へスクロール
   setTimeout(() => { listEl.scrollTop = listEl.scrollHeight; }, 10);
 }
 
@@ -951,7 +1057,6 @@ function submitComment() {
   const text = inputEl.value.trim();
   if (!text) return;
 
-  // 名前の確認
   let author = sessionStorage.getItem('shukatsu_author_name');
   if (!author) {
     author = prompt('誰からのコメントかわかるように、あなたのお名前（ニックネーム）を入力してください:');
@@ -973,6 +1078,7 @@ function submitComment() {
   inputEl.value = '';
   saveState();
   renderComments();
+  renderRecentComments(); // コメント直後にダッシュボードを更新
 }
 
 function exportData() {
