@@ -113,6 +113,10 @@ tbody tr:hover { background: #FAFAF8; }
 .step-line.done { background: #4CAF50; }
 .step-label { font-size: 10px; color: var(--text3); text-align: center; margin-top: 3px; white-space: nowrap; }
 
+/* Company research grid */
+.research-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+.research-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
 /* Inline input */
 .inline-input { border: none; border-bottom: 1px solid transparent; outline: none; font-family: var(--font); font-size: 13px; color: var(--text); background: transparent; width: 100%; padding: 2px 4px; transition: border 0.15s; }
 
@@ -145,6 +149,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 .event-int1 { background: #CFFAFE; color: #155E75; border: 1px solid #67E8F9; }
 .event-int2 { background: #E0F2FE; color: #075985; border: 1px solid #7DD3FC; }
 .event-final { background: #FFEDD5; color: #9A3412; border: 1px solid #FCA5A1; }
+.event-general { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; } /* 追加：個別予定の色 */
 
 /* 添削用チャットUI */
 .comment-btn { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:12px; background:var(--bg); border:1px solid var(--border); color:var(--text2); cursor:pointer; font-weight:500; transition:0.2s; }
@@ -197,9 +202,12 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     <div class="section-header" style="border-bottom:none; padding-bottom:0;">
       <span class="section-title">スケジュール</span>
       <div class="calendar-header" style="margin:0; padding:0;">
-        <button class="btn btn-ghost" onclick="prevMonth()">◀</button>
-        <span id="calendar-month-label" style="font-weight:700; font-size:14px; margin: 0 16px;"></span>
-        <button class="btn btn-ghost" onclick="nextMonth()">▶</button>
+        <div style="display:flex; align-items:center;">
+          <button class="btn btn-ghost" onclick="prevMonth()">◀</button>
+          <span id="calendar-month-label" style="font-weight:700; font-size:14px; margin: 0 16px;"></span>
+          <button class="btn btn-ghost" onclick="nextMonth()">▶</button>
+        </div>
+        <button class="btn" style="font-size:11px; padding:4px 8px;" onclick="addGeneralEvent()">＋ 個別の予定を追加</button>
       </div>
     </div>
     <div style="padding: 16px 20px;">
@@ -211,7 +219,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     <div class="section-header">
       <span class="section-title">企業一覧</span>
       <div style="display:flex;gap:8px;">
-        <button class="btn" onclick="sortTable('deadline')">締切順</button>
+        <button class="btn" onclick="sortTable('deadline')">ES締切順</button>
         <button class="btn" onclick="sortTable('interest')">志望度順</button>
       </div>
     </div>
@@ -227,6 +235,8 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
         <option>書類選考中</option>
         <option>一次面接</option>
         <option>二次面接</option>
+        <option>三次面接</option>
+        <option>四次面接</option>
         <option>最終面接</option>
         <option>最終面接待ち</option>
         <option>内定</option>
@@ -245,8 +255,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
             <th>ES締切</th>
             <th>残日数</th>
             <th>ES提出</th>
-            <th>一次面接</th>
-            <th>最終面接</th>
+            <th>現在フェーズの日程</th>
             <th>内定</th>
             <th>リンク</th>
           </tr>
@@ -403,7 +412,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
   </div>
 
   <div class="section">
-    <div class="section-header"><span class="section-title">基本情報 ＆ スケジュール設定</span></div>
+    <div class="section-header"><span class="section-title">基本情報</span></div>
     <div class="grid2" style="padding: 16px 20px;">
       <div>
         <div class="field-label">業界</div>
@@ -427,30 +436,22 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
         <div class="field-label">ログインID / 企業ID</div>
         <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-login-id" onchange="saveBasicInfo('loginId', this.value)">
       </div>
-
-      <div>
-        <div class="field-label">ES締切</div>
-        <input type="date" class="editable editable-sm" style="width:100%" id="edit-es-deadline" onchange="saveSchedule('esDeadline', this.value)">
-      </div>
-      <div>
-        <div class="field-label">一次面接</div>
-        <input type="date" class="editable editable-sm" style="width:100%" id="edit-int-1" onchange="saveSchedule('interview1', this.value)">
-      </div>
-      <div>
-        <div class="field-label">二次面接</div>
-        <input type="date" class="editable editable-sm" style="width:100%" id="edit-int-2" onchange="saveSchedule('interview2', this.value)">
-      </div>
-      <div>
-        <div class="field-label">最終面接</div>
-        <input type="date" class="editable editable-sm" style="width:100%" id="edit-int-final" onchange="saveSchedule('interviewFinal', this.value)">
-      </div>
     </div>
   </div>
 
   <div class="section">
     <div class="section-header">
+      <span class="section-title">スケジュール設定</span>
+      <button class="btn" onclick="addScheduleItem()">＋ 予定を追加</button>
+    </div>
+    <div style="padding: 16px 20px;" id="company-schedule-list">
+      </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
       <span class="section-title">ES設問 & 回答</span>
-      <button class="btn" onclick="addQuestion()">＋ 設問を追加</button>
+      <button class="btn" onclick="addDynamicQA('es')">＋ 設問を追加</button>
     </div>
     <div style="padding:16px 20px;" id="es-list"></div>
   </div>
@@ -474,7 +475,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     </div>
 
     <div id="modal-chat-list" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; background:var(--bg);">
-      </div>
+    </div>
 
     <div style="padding:16px 20px; border-top:1px solid var(--border); background:#fff; border-radius:0 0 12px 12px;">
       <textarea id="modal-chat-input" placeholder="ここをこう修正してみては？ / こういう意図で書きました など..." style="width:100%; height:70px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:13px; resize:none; outline:none; margin-bottom:10px;"></textarea>
@@ -502,7 +503,8 @@ let activeCommentTarget = null;
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth(); 
 
-const PHASES = ['未着手','ES作成中','添削待ち','添削完了','ES提出済','書類選考中','一次面接','二次面接','最終面接','最終面接待ち','内定','不採用'];
+// ★フェーズに 三次面接, 四次面接 を追加
+const PHASES = ['未着手','ES作成中','添削待ち','添削完了','ES提出済','書類選考中','一次面接','二次面接','三次面接','四次面接','最終面接','最終面接待ち','内定','不採用'];
 const PHASE_COLORS = {
   '未着手':     {bg:'#F1F1EF',text:'#6B6B65',border:'#D0D0CB'},
   'ES作成中':   {bg:'#FEF3C7',text:'#92400E',border:'#FCD34D'},
@@ -512,6 +514,8 @@ const PHASE_COLORS = {
   '書類選考中': {bg:'#EDE9FE',text:'#5B21B6',border:'#C4B5FD'},
   '一次面接':   {bg:'#CFFAFE',text:'#155E75',border:'#67E8F9'},
   '二次面接':   {bg:'#E0F2FE',text:'#075985',border:'#7DD3FC'},
+  '三次面接':   {bg:'#E0F2FE',text:'#0369A1',border:'#7DD3FC'},
+  '四次面接':   {bg:'#E0F2FE',text:'#0369A1',border:'#7DD3FC'},
   '最終面接':   {bg:'#FFEDD5',text:'#9A3412',border:'#FCA5A1'},
   '最終面接待ち':{bg:'#FEF08A',text:'#854D0E',border:'#FDE047'},
   '内定':       {bg:'#DCFCE7',text:'#166534',border:'#86EFAC'},
@@ -521,13 +525,15 @@ const PHASE_COLORS = {
 function defaultData() {
   return {
     companies: [],
-    selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:'', qa:[]}, // qa追加
+    selfAnalysis:{selfPR:'',gakuchika:'',strength:'',weakness:'',career:'',values:'', qa:[]}, 
     interview:{ qa:[], reverseQA:'' },
-    research:{title:'',field:'',overview:'',tech:'',result:'',learning:'', qa:[]}, // qa追加
+    research:{title:'',field:'',overview:'',tech:'',result:'',learning:'', qa:[]},
+    generalEvents: [], // 個別の予定用
     comments: {} 
   };
 }
 
+// 古いデータ構造から新しい構造へのマイグレーション処理
 async function loadState() {
   try {
     const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
@@ -536,17 +542,26 @@ async function loadState() {
     if (response.ok) {
       const data = await response.json();
       let rec = Object.keys(data.record).length > 0 ? data.record : defaultData();
+      
       if (!rec.comments) rec.comments = {}; 
-      // データ構造のマイグレーション（過去のデータにも新しい空リストを追加）
       if (!rec.selfAnalysis.qa) rec.selfAnalysis.qa = [];
       if (!rec.research.qa) rec.research.qa = [];
+      if (!rec.generalEvents) rec.generalEvents = [];
+
+      // 企業のスケジュールを動的リストに変換
+      rec.companies.forEach(c => {
+        if (!c.schedules) {
+          c.schedules = [];
+          if (c.esDeadline) c.schedules.push({ id: Date.now()+Math.random(), title: 'ES締切', date: c.esDeadline });
+          if (c.interview1) c.schedules.push({ id: Date.now()+Math.random(), title: '一次面接', date: c.interview1 });
+          if (c.interview2) c.schedules.push({ id: Date.now()+Math.random(), title: '二次面接', date: c.interview2 });
+          if (c.interviewFinal) c.schedules.push({ id: Date.now()+Math.random(), title: '最終面接', date: c.interviewFinal });
+        }
+      });
       return rec;
     }
     return defaultData();
-  } catch(e) {
-    console.error("読み込みエラー", e);
-    return defaultData();
-  }
+  } catch(e) { return defaultData(); }
 }
 
 function saveState() {
@@ -588,8 +603,181 @@ function renderAll() {
   renderRecentComments();
   renderTable();
   renderCalendar();
-  renderAllTabs(); // 全タブのデータを描画
+  renderAllTabs();
 }
+
+// ES締切日をスケジュールから取得
+function getEsDeadline(c) {
+  if(!c.schedules) return '';
+  const sched = c.schedules.find(s => s.title.includes('ES') && s.title.includes('締切'));
+  return sched ? sched.date : '';
+}
+
+// 現在のフェーズに対応する面接日等を取得
+function getPhaseDate(c) {
+  if(!c.schedules) return '—';
+  const sched = c.schedules.find(s => s.title.includes(c.phase) || c.phase.includes(s.title));
+  return sched && sched.date ? sched.date : '—';
+}
+
+function renderTable() {
+  const phaseFilter = document.getElementById('filter-phase').value;
+  const searchFilter = document.getElementById('filter-search').value.toLowerCase();
+
+  let cos = state.companies.filter(c => {
+    const matchPhase = phaseFilter === "" || c.phase === phaseFilter;
+    const matchSearch = searchFilter === "" || c.name.toLowerCase().includes(searchFilter);
+    return matchPhase && matchSearch;
+  });
+
+  if (tableSortMode === 'deadline') cos.sort((a,b) => new Date(getEsDeadline(a)||'9999-12-31') - new Date(getEsDeadline(b)||'9999-12-31'));
+  if (tableSortMode === 'interest') cos.sort((a,b) => (b.interest || 0) - (a.interest || 0));
+  
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = cos.map(c => {
+    const esDeadline = getEsDeadline(c);
+    const phaseDate = getPhaseDate(c);
+    const isEsSubmitted = c.esSubmitted || PHASES.indexOf(c.phase) >= PHASES.indexOf('ES提出済');
+    const isOffer = c.phase === '内定';
+    const isFail = c.phase === '不採用';
+
+    return `<tr>
+      <td><span class="company-link" onclick="showDetail(${c.id})">${c.name}</span></td>
+      <td style="color:var(--text2)">${c.industry||'—'}</td>
+      <td>★${c.interest || 3}</td>
+      <td>${phaseBadge(c.phase)}</td>
+      <td style="font-size:12px">${esDeadline||'—'}</td>
+      <td>${daysLeftHTML(esDeadline)}</td>
+      <td style="text-align:center; color:#2563EB; font-weight:bold;">${isEsSubmitted ? '○' : '—'}</td>
+      <td style="font-size:12px; font-weight:500;">${phaseDate}</td>
+      <td style="text-align:center; font-weight:bold; color:${isOffer ? '#16A34A' : (isFail ? '#DC2626' : 'var(--text)')};">${isOffer ? '○' : (isFail ? '×' : '—')}</td>
+      <td>${c.hp ? `<a href="${c.hp}" target="_blank" style="color:var(--accent);font-size:12px">開く</a>` : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// 企業ごとのスケジュールリスト描画
+function renderCompanySchedules() {
+  const c = getCompany(); if (!c) return;
+  const listEl = document.getElementById('company-schedule-list');
+  if (!c.schedules || c.schedules.length === 0) {
+    listEl.innerHTML = '<div style="color:var(--text3); font-size:12px;">予定がありません。「＋ 予定を追加」ボタンから追加してください。</div>';
+    return;
+  }
+  
+  listEl.innerHTML = c.schedules.map((s, i) => `
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+      <input type="text" class="editable editable-sm" style="flex:1; border:1px solid var(--border);" value="${s.title}" onchange="saveScheduleItem(${i}, 'title', this.value)" placeholder="例: 一次面接, 会社説明会, ES締切">
+      <input type="date" class="editable editable-sm" style="width:140px; border:1px solid var(--border);" value="${s.date}" onchange="saveScheduleItem(${i}, 'date', this.value)">
+      <button class="btn btn-ghost" style="color:#DC2626; padding: 4px 8px;" onclick="deleteScheduleItem(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function addScheduleItem() {
+  const c = getCompany(); if(!c) return;
+  if(!c.schedules) c.schedules = [];
+  c.schedules.push({ id: Date.now(), title: '', date: '' });
+  saveState(); renderCompanySchedules();
+}
+
+function saveScheduleItem(index, field, val) {
+  const c = getCompany(); if(!c) return;
+  c.schedules[index][field] = val;
+  saveState(); renderCompanySchedules(); renderTable(); renderCalendar();
+}
+
+function deleteScheduleItem(index) {
+  const c = getCompany(); if(!c) return;
+  c.schedules.splice(index, 1);
+  saveState(); renderCompanySchedules(); renderTable(); renderCalendar();
+}
+
+// ★ カレンダー個別予定の追加・削除
+function addGeneralEvent() {
+  const title = prompt('予定のタイトルを入力してください\n（例：SPIテスト、合同企業説明会、自己分析セミナー）');
+  if(!title) return;
+  const dateStr = prompt('日付を「YYYY-MM-DD」形式で入力してください\n※例：2026-05-10', `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-01`);
+  if(!dateStr) return;
+  
+  if(!state.generalEvents) state.generalEvents = [];
+  state.generalEvents.push({ id: Date.now(), title, date: dateStr });
+  saveState(); renderCalendar();
+}
+
+function clickGeneralEvent(id) {
+  if (confirm('この個別の予定を削除しますか？')) {
+    state.generalEvents = state.generalEvents.filter(e => e.id !== id);
+    saveState(); renderCalendar();
+  }
+}
+
+// カレンダー描画
+function renderCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  if(!grid) return;
+  const label = document.getElementById('calendar-month-label');
+  label.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const today = new Date();
+
+  let html = '';
+  const dayNames = ['日','月','火','水','木','金','土'];
+  dayNames.forEach(d => html += `<div class="calendar-day-header">${d}</div>`);
+
+  const events = {};
+  
+  // 企業の予定
+  state.companies.forEach(c => {
+    if(c.schedules) {
+      c.schedules.forEach(s => {
+        if(s.date) {
+          let cls = 'event-int1';
+          if(s.title.includes('ES')) cls = 'event-es';
+          else if(s.title.includes('最終')) cls = 'event-final';
+          else if(s.title.includes('二次') || s.title.includes('三次') || s.title.includes('四次')) cls = 'event-int2';
+          addEvent(events, s.date, `${c.name} ${s.title}`, cls, c.id, null);
+        }
+      });
+    }
+  });
+
+  // 個別の予定
+  if(state.generalEvents) {
+    state.generalEvents.forEach(g => {
+      if(g.date) addEvent(events, g.date, g.title, 'event-general', null, g.id);
+    });
+  }
+
+  for(let i = 0; i < firstDay; i++) html += `<div class="calendar-day other-month"></div>`;
+
+  for(let i = 1; i <= daysInMonth; i++) {
+    const isToday = today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === i;
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+    const dayEvents = events[dateStr] || [];
+
+    let eventHtml = dayEvents.map(e => {
+      if (e.id) {
+        return `<div class="event-badge ${e.cls}" onclick="showDetail(${e.id}); event.stopPropagation();" title="${e.name}">${e.name}</div>`;
+      } else {
+        return `<div class="event-badge ${e.cls}" onclick="clickGeneralEvent(${e.genId}); event.stopPropagation();" title="${e.name}">${e.name}</div>`;
+      }
+    }).join('');
+
+    html += `<div class="calendar-day ${isToday ? 'today' : ''}"><div class="calendar-date">${i}</div>${eventHtml}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function addEvent(eventsObj, dateStr, name, cls, id, genId) {
+  if(!eventsObj[dateStr]) eventsObj[dateStr] = [];
+  eventsObj[dateStr].push({name, cls, id, genId});
+}
+
+function prevMonth() { currentMonth--; if(currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
+function nextMonth() { currentMonth++; if(currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); }
 
 // ダッシュボード：最新の添削履歴を表示
 function renderRecentComments() {
@@ -606,34 +794,24 @@ function renderRecentComments() {
 
   for (const targetId in state.comments) {
     const thread = state.comments[targetId];
-    let targetName = '';
-    let companyName = '';
+    let targetName = ''; let companyName = '';
     
-    if (fieldNames[targetId]) {
-      targetName = fieldNames[targetId];
-    } else if (targetId.startsWith('es_')) {
+    if (fieldNames[targetId]) { targetName = fieldNames[targetId]; } 
+    else if (targetId.startsWith('es_')) {
       const esId = parseInt(targetId.replace('es_', ''));
       let found = false;
       for (const c of state.companies) {
         const qIdx = c.esQuestions.findIndex(q => q.id === esId);
         if (qIdx !== -1) {
-          companyName = c.name;
-          targetName = `設問${qIdx + 1}`;
-          found = true; break;
+          companyName = c.name; targetName = `設問${qIdx + 1}`; found = true; break;
         }
       }
       if(!found) continue; 
-    } else if (targetId.startsWith('self_qa_')) {
-      targetName = '自己分析(追加設問)';
-    } else if (targetId.startsWith('int_qa_')) {
-      targetName = '面接対策(Q&A)';
-    } else if (targetId.startsWith('res_qa_')) {
-      targetName = '研究概要(追加設問)';
-    }
+    } else if (targetId.startsWith('self_qa_')) { targetName = '自己分析(追加設問)'; } 
+      else if (targetId.startsWith('int_qa_')) { targetName = '面接対策(Q&A)'; } 
+      else if (targetId.startsWith('res_qa_')) { targetName = '研究概要(追加設問)'; }
 
-    thread.forEach(c => {
-      allComments.push({ ...c, targetId, companyName, targetName });
-    });
+    thread.forEach(c => allComments.push({ ...c, targetId, companyName, targetName }));
   }
 
   allComments.sort((a, b) => b.timestamp - a.timestamp);
@@ -671,57 +849,16 @@ function renderRecentComments() {
 function jumpToComment(targetId, companyName) {
   if (companyName) {
     const c = state.companies.find(comp => comp.name === companyName);
-    if (c) {
-      showDetail(c.id);
-      openCommentModal(targetId, `${c.name}の設問`);
-    }
+    if (c) { showDetail(c.id); openCommentModal(targetId, `${c.name}の設問`); }
   } else {
     showHome();
     if(targetId.startsWith('int_qa_') || targetId === 'reverseQA') switchTab(document.querySelector('.tab-btn:nth-child(2)'), 'interview');
     else if(targetId.startsWith('res_qa_') || ['title','field','overview','tech','result','learning'].includes(targetId)) switchTab(document.querySelector('.tab-btn:nth-child(3)'), 'research');
     else switchTab(document.querySelector('.tab-btn:nth-child(1)'), 'self');
-    
     openCommentModal(targetId, '共通項目の添削');
   }
 }
 
-// --- カレンダー処理 ---
-function renderCalendar() { /* 省略せずそのまま */
-  const grid = document.getElementById('calendar-grid');
-  if(!grid) return;
-  const label = document.getElementById('calendar-month-label');
-  label.textContent = `${currentYear}年 ${currentMonth + 1}月`;
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const today = new Date();
-  let html = '';
-  const dayNames = ['日','月','火','水','木','金','土'];
-  dayNames.forEach(d => html += `<div class="calendar-day-header">${d}</div>`);
-  const events = {};
-  state.companies.forEach(c => {
-    if(c.esDeadline) addEvent(events, c.esDeadline, c.name + ' ES締切', 'event-es', c.id);
-    if(c.interview1) addEvent(events, c.interview1, c.name + ' 1次面接', 'event-int1', c.id);
-    if(c.interview2) addEvent(events, c.interview2, c.name + ' 2次面接', 'event-int2', c.id);
-    if(c.interviewFinal) addEvent(events, c.interviewFinal, c.name + ' 最終面接', 'event-final', c.id);
-  });
-  for(let i = 0; i < firstDay; i++) { html += `<div class="calendar-day other-month"></div>`; }
-  for(let i = 1; i <= daysInMonth; i++) {
-    const isToday = today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === i;
-    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-    const dayEvents = events[dateStr] || [];
-    let eventHtml = dayEvents.map(e => `<div class="event-badge ${e.cls}" onclick="showDetail(${e.id}); event.stopPropagation();" title="${e.name}">${e.name}</div>`).join('');
-    html += `<div class="calendar-day ${isToday ? 'today' : ''}"><div class="calendar-date">${i}</div>${eventHtml}</div>`;
-  }
-  grid.innerHTML = html;
-}
-function addEvent(eventsObj, dateStr, name, cls, id) {
-  if(!eventsObj[dateStr]) eventsObj[dateStr] = [];
-  eventsObj[dateStr].push({name, cls, id});
-}
-function prevMonth() { currentMonth--; if(currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
-function nextMonth() { currentMonth++; if(currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); }
-
-// --- 統計＆テーブル ---
 function renderStats() {
   const cos = state.companies;
   const entryCount = cos.length;
@@ -756,52 +893,19 @@ function phaseBadge(phase) {
   return `<span class="badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${phase}</span>`;
 }
 
-let tableSortMode = null;
-function sortTable(mode) { tableSortMode = mode; renderTable(); }
-
-function renderTable() {
-  const phaseFilter = document.getElementById('filter-phase').value;
-  const searchFilter = document.getElementById('filter-search').value.toLowerCase();
-
-  let cos = state.companies.filter(c => {
-    const matchPhase = phaseFilter === "" || c.phase === phaseFilter;
-    const matchSearch = searchFilter === "" || c.name.toLowerCase().includes(searchFilter);
-    return matchPhase && matchSearch;
-  });
-
-  if (tableSortMode === 'deadline') cos.sort((a,b) => new Date(a.esDeadline||'9999-12-31') - new Date(b.esDeadline||'9999-12-31'));
-  if (tableSortMode === 'interest') cos.sort((a,b) => (b.interest || 0) - (a.interest || 0));
-  
-  const tbody = document.getElementById('table-body');
-  tbody.innerHTML = cos.map(c => {
-    const isEsSubmitted = c.esSubmitted || PHASES.indexOf(c.phase) >= PHASES.indexOf('ES提出済');
-    const isOffer = c.phase === '内定';
-    const isFail = c.phase === '不採用';
-
-    return `<tr>
-      <td><span class="company-link" onclick="showDetail(${c.id})">${c.name}</span></td>
-      <td style="color:var(--text2)">${c.industry||'—'}</td>
-      <td>★${c.interest || 3}</td>
-      <td>${phaseBadge(c.phase)}</td>
-      <td style="font-size:12px">${c.esDeadline||'—'}</td>
-      <td>${daysLeftHTML(c.esDeadline)}</td>
-      <td style="text-align:center; color:#2563EB; font-weight:bold;">${isEsSubmitted ? '○' : '—'}</td>
-      <td style="font-size:12px">${c.interview1||'—'}</td>
-      <td style="font-size:12px">${c.interviewFinal||'—'}</td>
-      <td style="text-align:center; font-weight:bold; color:${isOffer ? '#16A34A' : (isFail ? '#DC2626' : 'var(--text)')};">${isOffer ? '○' : (isFail ? '×' : '—')}</td>
-      <td>${c.hp ? `<a href="${c.hp}" target="_blank" style="color:var(--accent);font-size:12px">開く</a>` : '—'}</td>
-    </tr>`;
-  }).join('');
-}
-
 function addCompany() {
   const name = prompt('企業名を入力してください');
   if (!name || !name.trim()) return;
   const newId = Date.now();
   state.companies.push({
     id: newId, name: name.trim(), industry: '', interest: 3, phase: '未着手',
-    esDeadline: '', esSubmitted: null, interview1: '', interview2: '', interviewFinal: '', offerStatus: null,
-    hp: '', loginId: '',
+    esSubmitted: null, offerStatus: null, hp: '', loginId: '',
+    schedules: [
+      { id: Date.now()+1, title: 'ES締切', date: '' },
+      { id: Date.now()+2, title: '一次面接', date: '' },
+      { id: Date.now()+3, title: '二次面接', date: '' },
+      { id: Date.now()+4, title: '最終面接', date: '' }
+    ],
     esQuestions:[], research:{overview:'',strength:'',news:'',motivation:'',benefits:'',obNotes:''}
   });
   saveState(); showDetail(newId);
@@ -812,11 +916,8 @@ function editCompanyName() {
   const newName = prompt('企業名を変更してください:', c.name);
   if (newName && newName.trim() !== '') {
     c.name = newName.trim();
-    saveState();
-    document.getElementById('detail-name').textContent = c.name;
-    renderTable();
-    renderCalendar();
-    renderRecentComments();
+    saveState(); document.getElementById('detail-name').textContent = c.name;
+    renderTable(); renderCalendar(); renderRecentComments();
   }
 }
 
@@ -824,8 +925,7 @@ function deleteCompany() {
   const c = getCompany(); if (!c) return;
   if (confirm(`本当に「${c.name}」を一覧から削除しますか？\nこの操作は取り消せません。`)) {
     state.companies = state.companies.filter(comp => comp.id !== c.id);
-    saveState();
-    showHome(); 
+    saveState(); showHome(); 
   }
 }
 
@@ -844,33 +944,18 @@ function renderDetail() {
   document.getElementById('edit-hp').value = c.hp || '';
   document.getElementById('edit-login-id').value = c.loginId || '';
 
-  document.getElementById('edit-es-deadline').value = c.esDeadline || '';
-  document.getElementById('edit-int-1').value = c.interview1 || '';
-  document.getElementById('edit-int-2').value = c.interview2 || '';
-  document.getElementById('edit-int-final').value = c.interviewFinal || '';
-
   renderStepper();
+  renderCompanySchedules();
   renderESList();
 }
 
 function saveBasicInfo(key, val) {
   const c = getCompany(); if(!c) return;
-  c[key] = val;
-  saveState();
-  renderTable(); 
+  c[key] = val; saveState(); renderTable(); 
   if(key === 'hp') {
     const hpEl = document.getElementById('detail-hp');
-    hpEl.href = val || '#';
-    hpEl.style.display = val ? '' : 'none';
+    hpEl.href = val || '#'; hpEl.style.display = val ? '' : 'none';
   }
-}
-
-function saveSchedule(key, val) {
-  const c = getCompany(); if(!c) return;
-  c[key] = val;
-  saveState();
-  renderTable();
-  renderCalendar();
 }
 
 function renderStepper() {
@@ -881,34 +966,23 @@ function renderStepper() {
   
   let html = '<div style="display:flex;align-items:flex-start;gap:0;">';
   PHASES.forEach((p, i) => {
-    let dotClass = 'step-dot';
-    let isDone = false;
-    let isActive = false;
-    let extraStyle = '';
-    
-    if (c.phase === p) {
-      isActive = true;
-    } else if (currentIdx > i) {
-      if ((c.phase === '内定' || c.phase === '不採用') && i < Math.min(failIdx, offerIdx)) {
-        isDone = true; 
-      } else if (c.phase !== '不採用' && c.phase !== '内定') {
-        isDone = true;
-      }
+    let dotClass = 'step-dot'; let isDone = false; let isActive = false; let extraStyle = '';
+    if (c.phase === p) { isActive = true; } 
+    else if (currentIdx > i) {
+      if ((c.phase === '内定' || c.phase === '不採用') && i < Math.min(failIdx, offerIdx)) { isDone = true; } 
+      else if (c.phase !== '不採用' && c.phase !== '内定') { isDone = true; }
     }
-
     if (isDone) dotClass += ' done';
     if (isActive) {
       dotClass += ' active';
       if (p === '内定') extraStyle = 'background:#16A34A; border-color:#16A34A; color:white;';
       if (p === '不採用') extraStyle = 'background:#DC2626; border-color:#DC2626; color:white;';
     }
-
     let lineClass = 'step-line';
     if (isDone || (isActive && i < Math.min(failIdx, offerIdx))) lineClass += ' done';
 
     let dotText = i + 1;
-    if (p === '内定') dotText = '🎉';
-    if (p === '不採用') dotText = '×';
+    if (p === '内定') dotText = '🎉'; if (p === '不採用') dotText = '×';
 
     html += `<div style="display:flex;flex-direction:column;align-items:center;">
       <div style="display:flex;align-items:center;">
@@ -925,8 +999,7 @@ function renderStepper() {
 function setPhase(phase) {
   const c = getCompany(); if (!c) return;
   c.phase = phase; 
-  const pIdx = PHASES.indexOf(phase);
-  c.esSubmitted = pIdx >= PHASES.indexOf('ES提出済');
+  c.esSubmitted = PHASES.indexOf(phase) >= PHASES.indexOf('ES提出済');
   if (phase === '内定') c.offerStatus = true;
   else if (phase === '不採用') c.offerStatus = false;
   else c.offerStatus = null;
@@ -934,11 +1007,6 @@ function setPhase(phase) {
   document.getElementById('detail-phase-badge').innerHTML = phaseBadge(phase);
   renderStepper(); renderStats(); renderTable();
 }
-
-
-// ==========================================
-// ★ 設問・回答の描画（共通コンポーネント化）
-// ==========================================
 
 function renderDynamicQA(listData, containerId, idPrefix, titlePrefix, type) {
   const html = listData.map((q, i) => {
@@ -966,14 +1034,12 @@ function renderDynamicQA(listData, containerId, idPrefix, titlePrefix, type) {
   document.getElementById(containerId).innerHTML = html;
 }
 
-// 企業ESの描画
 function renderESList() {
   const c = getCompany(); if (!c) return;
   renderDynamicQA(c.esQuestions, 'es-list', 'es', '設問', 'es');
 }
 
 function renderAllTabs() {
-  // 固定フィールドの値セット
   const els = document.querySelectorAll('[data-key^="selfAnalysis."]');
   els.forEach(el => {
     const key = el.getAttribute('data-key').split('.')[1];
@@ -986,14 +1052,9 @@ function renderAllTabs() {
   });
   document.querySelector('[data-key="interview.reverseQA"]').textContent = state.interview.reverseQA || '';
 
-  // 固定フィールドの添削ボタン更新
-  const basicFields = [
-    'selfPR', 'gakuchika', 'strength', 'weakness', 'career', 'values',
-    'reverseQA', 'title', 'field', 'overview', 'tech', 'result', 'learning'
-  ];
+  const basicFields = ['selfPR', 'gakuchika', 'strength', 'weakness', 'career', 'values','reverseQA', 'title', 'field', 'overview', 'tech', 'result', 'learning'];
   basicFields.forEach(f => updateCommentBtn(f, `btn-${f}`));
 
-  // 動的QAリストの描画
   renderDynamicQA(state.selfAnalysis.qa, 'self-qa-list', 'self_qa', '追加設問', 'selfAnalysis');
   renderDynamicQA(state.interview.qa, 'int-qa-list', 'int_qa', 'Q&A', 'interview');
   renderDynamicQA(state.research.qa, 'res-qa-list', 'res_qa', '追加設問', 'research');
@@ -1003,23 +1064,16 @@ function updateCommentBtn(targetId, btnId) {
   const btn = document.getElementById(btnId);
   if(!btn) return;
   const count = state.comments[targetId] ? state.comments[targetId].length : 0;
-  if(count > 0) {
-    btn.className = "comment-btn has-comments";
-    btn.innerHTML = `💬 添削 (${count})`;
-  } else {
-    btn.className = "comment-btn";
-    btn.innerHTML = `💬 添削`;
-  }
+  if(count > 0) { btn.className = "comment-btn has-comments"; btn.innerHTML = `💬 添削 (${count})`; } 
+  else { btn.className = "comment-btn"; btn.innerHTML = `💬 添削`; }
 }
 
-// 動的QAの追加・保存・削除（共通処理）
 function addDynamicQA(type) {
   const newItem = {id:Date.now(), q:'', a:''};
   if (type === 'es') { const c = getCompany(); if(c) c.esQuestions.push(newItem); }
   else { state[type].qa.push(newItem); }
   saveState();
-  if (type === 'es') renderESList();
-  else renderAllTabs();
+  if (type === 'es') renderESList(); else renderAllTabs();
 }
 
 function saveDynamicQA(type, index, field, val) {
@@ -1033,14 +1087,10 @@ function deleteDynamicQA(type, index) {
     if (type === 'es') { const c = getCompany(); if(c) c.esQuestions.splice(index, 1); }
     else { state[type].qa.splice(index, 1); }
     saveState();
-    if (type === 'es') renderESList();
-    else renderAllTabs();
+    if (type === 'es') renderESList(); else renderAllTabs();
   }
 }
 
-function addQuestion() { addDynamicQA('es'); } // 互換性のため
-
-// 基本項目の保存
 function saveSelfAnalysis(key, val) { state.selfAnalysis[key] = val; saveState(); }
 function saveResearchOverall(key, val) { state.research[key] = val; saveState(); }
 function saveInterviewReverseQA(val) { state.interview.reverseQA = val; saveState(); }
@@ -1050,7 +1100,6 @@ function switchTab(btn, tabId) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+tabId).classList.add('active');
 }
 
-// === 💬 添削・コメント機能 (Modal) ===
 function openCommentModal(targetId, title) {
   activeCommentTarget = targetId;
   document.getElementById('modal-title').textContent = title + ' の添削';
@@ -1073,13 +1122,9 @@ function openCommentModal(targetId, title) {
   } else if (targetId.startsWith('res_qa_')) {
     const q = state.research.qa.find(x => x.id === parseInt(targetId.replace('res_qa_', '')));
     if(q) currentText = `【設問】\n${q.q}\n\n【回答】\n${q.a}`;
-  } else if (targetId === 'reverseQA') {
-    currentText = state.interview.reverseQA || "";
-  } else if (state.selfAnalysis[targetId] !== undefined) {
-    currentText = state.selfAnalysis[targetId] || "";
-  } else if (state.research[targetId] !== undefined) {
-    currentText = state.research[targetId] || "";
-  }
+  } else if (targetId === 'reverseQA') { currentText = state.interview.reverseQA || ""; } 
+    else if (state.selfAnalysis[targetId] !== undefined) { currentText = state.selfAnalysis[targetId] || ""; } 
+    else if (state.research[targetId] !== undefined) { currentText = state.research[targetId] || ""; }
   
   document.getElementById('modal-current-text').textContent = currentText;
 
@@ -1090,8 +1135,7 @@ function openCommentModal(targetId, title) {
 function closeCommentModal() {
   document.getElementById('comment-modal').style.display = 'none';
   activeCommentTarget = null;
-  if(currentCompanyId) renderESList();
-  renderAllTabs();
+  if(currentCompanyId) renderESList(); renderAllTabs();
 }
 
 function renderComments() {
@@ -1115,7 +1159,6 @@ function renderComments() {
       </div>
     `;
   }).join('');
-  
   setTimeout(() => { listEl.scrollTop = listEl.scrollHeight; }, 10);
 }
 
@@ -1131,21 +1174,10 @@ function submitComment() {
     sessionStorage.setItem('shukatsu_author_name', author.trim());
   }
 
-  if (!state.comments[activeCommentTarget]) {
-    state.comments[activeCommentTarget] = [];
-  }
+  if (!state.comments[activeCommentTarget]) state.comments[activeCommentTarget] = [];
+  state.comments[activeCommentTarget].push({ id: Date.now(), author: author, text: text, timestamp: Date.now() });
 
-  state.comments[activeCommentTarget].push({
-    id: Date.now(),
-    author: author,
-    text: text,
-    timestamp: Date.now()
-  });
-
-  inputEl.value = '';
-  saveState();
-  renderComments();
-  renderRecentComments(); 
+  inputEl.value = ''; saveState(); renderComments(); renderRecentComments(); 
 }
 
 function exportData() {
@@ -1156,26 +1188,18 @@ function importData() { document.getElementById('import-input').click(); }
 
 async function initApp() {
   const isLoggedIn = sessionStorage.getItem('shukatsu_logged_in');
-
   if (!isLoggedIn) {
     const input = prompt('就活管理アプリにアクセスするためのパスコードを入力してください:');
-    if (input === EXPECTED_PASSCODE) {
-      sessionStorage.setItem('shukatsu_logged_in', 'true');
-    } else {
+    if (input === EXPECTED_PASSCODE) { sessionStorage.setItem('shukatsu_logged_in', 'true'); } 
+    else {
       document.body.innerHTML = '<div style="padding:40px; text-align:center; font-size:16px;">パスコードが違います。<br>ページを再読み込みしてやり直してください。</div>';
       return;
     }
   }
-  
   document.body.insertAdjacentHTML('afterbegin', '<div id="loading" style="text-align:center; padding:40px; font-size: 14px;">クラウドからデータを読み込み中...</div>');
-  
   state = await loadState();
-  
-  const loadingEl = document.getElementById('loading');
-  if(loadingEl) loadingEl.remove();
-  
+  const loadingEl = document.getElementById('loading'); if(loadingEl) loadingEl.remove();
   document.getElementById('app').style.display = 'block';
-
   renderAll();
 }
 
