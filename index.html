@@ -235,7 +235,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
             <th>一次面接</th>
             <th>最終面接</th>
             <th>内定</th>
-            <th>HP</th>
+            <th>リンク</th>
           </tr>
         </thead>
         <tbody id="table-body"></tbody>
@@ -310,7 +310,7 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     <div class="detail-header">
       <div class="detail-company-name" id="detail-name" onclick="editCompanyName()" title="クリックして企業名を変更">企業名</div>
       <div id="detail-phase-badge"></div>
-      <a id="detail-hp" href="#" target="_blank" class="btn" style="font-size:12px;">公式サイト ↗</a>
+      <a id="detail-hp" href="#" target="_blank" class="btn" style="font-size:12px;">公式サイト / マイページ ↗</a>
       <button class="btn btn-danger" onclick="deleteCompany()" style="margin-left:auto;">🗑 削除</button>
     </div>
     <div id="phase-stepper" class="phase-stepper"></div>
@@ -333,6 +333,16 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
           <option value="1">★1 (とりあえず)</option>
         </select>
       </div>
+      
+      <div>
+        <div class="field-label">URL (マイページ等)</div>
+        <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-hp" onchange="saveBasicInfo('hp', this.value)" placeholder="https://...">
+      </div>
+      <div>
+        <div class="field-label">ログインID / 企業ID</div>
+        <input type="text" class="editable editable-sm" style="width:100%; border: 1px solid var(--border);" id="edit-login-id" onchange="saveBasicInfo('loginId', this.value)" placeholder="例：user1234">
+      </div>
+
       <div>
         <div class="field-label">ES締切</div>
         <input type="date" class="editable editable-sm" style="width:100%" id="edit-es-deadline" onchange="saveSchedule('esDeadline', this.value)">
@@ -376,14 +386,11 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="doImport(event)">
 
 <script>
-// --- ここに取得したIDとキーを入力してください ---
 const BIN_ID = '69d66d7436566621a88f7121';
 const API_KEY = '$2a$10$o0ckigFFVu0U9kEmzwnpduZygWWYhCMH9pl6oLENj393iJv/HbzhO';
 
-// URLの「合言葉」チェック設定
-const urlParams = new URLSearchParams(window.location.search);
-const secretKey = urlParams.get('key');
-const EXPECTED_KEY = 'MORI'; // ★仲間内で共有するURLの「?key=」のあとに付ける合言葉
+// 要求するパスコード
+const EXPECTED_PASSCODE = 'MORI'; 
 
 let state = null;
 let currentCompanyId = null;
@@ -543,7 +550,7 @@ function renderStats() {
   const entryCount = cos.length;
   const esSubmittedCount = cos.filter(c => c.esSubmitted || PHASES.indexOf(c.phase) >= 2).length;
   const activeCount = cos.filter(c => !['未着手','内定','不採用'].includes(c.phase)).length;
-  const offerCount = cos.filter(c => c.phase === '内定').length; // 内定のカウント
+  const offerCount = cos.filter(c => c.phase === '内定').length;
 
   document.getElementById('stat-cards').innerHTML = `
     <div class="stat-card"><div class="val">${entryCount}</div><div class="lbl">エントリー数</div></div>
@@ -612,7 +619,8 @@ function addCompany() {
   state.companies.push({
     id: newId, name: name.trim(), industry: '', interest: 3, phase: '未着手',
     esDeadline: '', esSubmitted: null, interview1: '', interview2: '', interviewFinal: '', offerStatus: null,
-    hp: '', esQuestions:[], research:{overview:'',strength:'',news:'',motivation:'',benefits:'',obNotes:''}
+    hp: '', loginId: '', // ←追加
+    esQuestions:[], research:{overview:'',strength:'',news:'',motivation:'',benefits:'',obNotes:''}
   });
   saveState(); showDetail(newId);
 }
@@ -644,11 +652,14 @@ function renderDetail() {
   const c = getCompany(); if (!c) return;
   document.getElementById('detail-name').textContent = c.name;
   document.getElementById('detail-phase-badge').innerHTML = phaseBadge(c.phase);
+  
   const hpEl = document.getElementById('detail-hp');
   hpEl.href = c.hp || '#'; hpEl.style.display = c.hp ? '' : 'none';
   
   document.getElementById('edit-industry').value = c.industry || '';
   document.getElementById('edit-interest').value = c.interest || 3;
+  document.getElementById('edit-hp').value = c.hp || ''; // ←追加
+  document.getElementById('edit-login-id').value = c.loginId || ''; // ←追加
 
   document.getElementById('edit-es-deadline').value = c.esDeadline || '';
   document.getElementById('edit-int-1').value = c.interview1 || '';
@@ -665,6 +676,13 @@ function saveBasicInfo(key, val) {
   c[key] = val;
   saveState();
   renderTable(); 
+  
+  // URLが変更されたらヘッダーのボタンも即座に更新する
+  if(key === 'hp') {
+    const hpEl = document.getElementById('detail-hp');
+    hpEl.href = val || '#';
+    hpEl.style.display = val ? '' : 'none';
+  }
 }
 
 function saveSchedule(key, val) {
@@ -675,7 +693,6 @@ function saveSchedule(key, val) {
   renderCalendar();
 }
 
-// === 変更：内定・不採用を含むステッパーの描画 ===
 function renderStepper() {
   const c = getCompany(); if (!c) return;
   const currentIdx = PHASES.indexOf(c.phase);
@@ -687,12 +704,11 @@ function renderStepper() {
     let isActive = false;
     let extraStyle = '';
     
-    // ステータス判定
     if (c.phase === p) {
       isActive = true;
     } else if (currentIdx > i) {
       if (i <= 6 && (c.phase === '内定' || c.phase === '不採用')) {
-        isDone = true; // 内定か不採用の時、これまでの面接などはすべてDone扱い
+        isDone = true; 
       } else if (c.phase !== '不採用' && c.phase !== '内定') {
         isDone = true;
       }
@@ -701,7 +717,6 @@ function renderStepper() {
     if (isDone) dotClass += ' done';
     if (isActive) {
       dotClass += ' active';
-      // 選択中かつ特別なフェーズの場合は色を変える
       if (p === '内定') extraStyle = 'background:#16A34A; border-color:#16A34A; color:white;';
       if (p === '不採用') extraStyle = 'background:#DC2626; border-color:#DC2626; color:white;';
     }
@@ -709,7 +724,6 @@ function renderStepper() {
     let lineClass = 'step-line';
     if (isDone || (isActive && i < 6)) lineClass += ' done';
 
-    // アイコンや数字の表示
     let dotText = i + 1;
     if (p === '内定') dotText = '🎉';
     if (p === '不採用') dotText = '×';
@@ -730,7 +744,6 @@ function setPhase(phase) {
   const c = getCompany(); if (!c) return;
   c.phase = phase; 
   
-  // ES提出済以上のフェーズなら自動的にフラグを立てる
   const pIdx = PHASES.indexOf(phase);
   c.esSubmitted = pIdx >= 2;
   
@@ -743,7 +756,6 @@ function setPhase(phase) {
   renderStepper(); renderStats(); renderTable();
 }
 
-// === 変更：ES設問・回答のUI分離 ＆ 削除機能追加 ===
 function renderESList() {
   const c = getCompany(); if (!c) return;
   document.getElementById('es-list').innerHTML = c.esQuestions.map((q, i) => `
@@ -763,7 +775,6 @@ function renderESList() {
   `).join('');
 }
 
-// 追加：ES削除機能
 function deleteESQ(index) {
   const c = getCompany(); if (!c) return;
   if (confirm('この設問と回答を削除してもよろしいですか？')) {
@@ -781,7 +792,7 @@ function saveESQ(index, field, val) {
 
 function addQuestion() {
   const c = getCompany(); if (!c) return;
-  c.esQuestions.push({id:Date.now(), q:'', a:'', maxLen:400}); // 空欄で追加してプレースホルダーを見せる
+  c.esQuestions.push({id:Date.now(), q:'', a:'', maxLen:400});
   saveState(); renderESList();
 }
 
@@ -845,9 +856,17 @@ function importData() { document.getElementById('import-input').click(); }
 function doImport(e) { /* 省略 */ }
 
 async function initApp() {
-  if (secretKey !== EXPECTED_KEY) {
-    document.body.innerHTML = '<div style="padding:40px; text-align:center; font-size:16px;">アクセス権がありません。<br>正しいURLからアクセスしてください。</div>';
-    return;
+  const isLoggedIn = sessionStorage.getItem('shukatsu_logged_in');
+
+  if (!isLoggedIn) {
+    const input = prompt('就活管理アプリにアクセスするためのパスコードを入力してください:');
+    
+    if (input === EXPECTED_PASSCODE) {
+      sessionStorage.setItem('shukatsu_logged_in', 'true');
+    } else {
+      document.body.innerHTML = '<div style="padding:40px; text-align:center; font-size:16px;">パスコードが違います。<br>ページを再読み込みしてやり直してください。</div>';
+      return;
+    }
   }
   
   document.body.insertAdjacentHTML('afterbegin', '<div id="loading" style="text-align:center; padding:40px; font-size: 14px;">クラウドからデータを読み込み中...</div>');
