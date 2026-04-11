@@ -65,6 +65,21 @@ tbody tr:hover { background: #FAFAF8; }
 .editable:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(47,84,235,0.08); }
 .editable[data-placeholder]:empty::before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
 .editable-sm { min-height: 40px; }
+/* ===== 文字カウンター ===== */
+.char-count {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+  user-select: none;
+}
+.char-count.warn { color: #D97706; font-weight: 500; }
+.char-count.over { color: #DC2626; font-weight: 700; }
+/* ========================= */
 .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 20px; }
 .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 12px 16px; font-size: 13px; color: var(--text2); cursor: pointer; font-family: var(--font); margin-bottom: -1px; transition: all 0.15s; white-space: nowrap; }
 .tab-btn:hover { color: var(--text); }
@@ -237,42 +252,60 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
             <div class="field-label" style="margin:0;">自己PR（約300字）</div>
             <button class="comment-btn" id="btn-selfPR" onclick="openCommentModal('selfPR', '自己PR')">💬 添削</button>
           </div>
-          <div class="editable" contenteditable="true" data-key="selfAnalysis.selfPR" onblur="saveSelfAnalysis('selfPR',this.textContent)"></div>
+          <div class="editable" contenteditable="true" data-key="selfAnalysis.selfPR" data-limit="300"
+               oninput="updateCharCount(this)"
+               onblur="saveSelfAnalysis('selfPR',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div>
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">ガクチカ（学生時代に最も力を入れたこと）</div>
             <button class="comment-btn" id="btn-gakuchika" onclick="openCommentModal('gakuchika', 'ガクチカ')">💬 添削</button>
           </div>
-          <div class="editable" contenteditable="true" data-key="selfAnalysis.gakuchika" onblur="saveSelfAnalysis('gakuchika',this.textContent)"></div>
+          <div class="editable" contenteditable="true" data-key="selfAnalysis.gakuchika"
+               oninput="updateCharCount(this)"
+               onblur="saveSelfAnalysis('gakuchika',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div>
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">長所</div>
             <button class="comment-btn" id="btn-strength" onclick="openCommentModal('strength', '長所')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.strength" onblur="saveSelfAnalysis('strength',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.strength"
+               oninput="updateCharCount(this)"
+               onblur="saveSelfAnalysis('strength',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div>
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">短所・改善への取り組み</div>
             <button class="comment-btn" id="btn-weakness" onclick="openCommentModal('weakness', '短所')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.weakness" onblur="saveSelfAnalysis('weakness',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.weakness"
+               oninput="updateCharCount(this)"
+               onblur="saveSelfAnalysis('weakness',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div class="span2">
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">キャリアビジョン（5年後・10年後）</div>
             <button class="comment-btn" id="btn-career" onclick="openCommentModal('career', 'キャリアビジョン')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.career" onblur="saveSelfAnalysis('career',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.career"
+               oninput="updateCharCount(this)"
+               onblur="saveSelfAnalysis('career',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div class="span2">
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">働く上で大切にしたいこと</div>
             <button class="comment-btn" id="btn-values" onclick="openCommentModal('values', '働く上で大切にしたいこと')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.values" onblur="saveSelfAnalysis('values',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="selfAnalysis.values"
+               oninput="updateCharCount(this)"
+               onblur="saveSelfAnalysis('values',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
       </div>
       <div style="border-top:1px dashed var(--border); padding-top:16px;">
@@ -293,7 +326,10 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
           <div class="field-label" style="margin:0;">逆質問リスト（面接官への質問）</div>
           <button class="comment-btn" id="btn-reverseQA" onclick="openCommentModal('reverseQA', '逆質問リスト')">💬 添削</button>
         </div>
-        <div class="editable" contenteditable="true" data-key="interview.reverseQA" onblur="saveInterviewReverseQA(this.textContent)"></div>
+        <div class="editable" contenteditable="true" data-key="interview.reverseQA"
+             oninput="updateCharCount(this)"
+             onblur="saveInterviewReverseQA(this.textContent)"></div>
+        <span class="char-count">0文字</span>
       </div>
     </div>
 
@@ -304,42 +340,60 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
             <div class="field-label" style="margin:0;">研究タイトル</div>
             <button class="comment-btn" id="btn-title" onclick="openCommentModal('title', '研究タイトル')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="research.title" onblur="saveResearchOverall('title',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.title"
+               oninput="updateCharCount(this)"
+               onblur="saveResearchOverall('title',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div>
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">研究分野・キーワード</div>
             <button class="comment-btn" id="btn-field" onclick="openCommentModal('field', '研究分野')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="research.field" onblur="saveResearchOverall('field',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.field"
+               oninput="updateCharCount(this)"
+               onblur="saveResearchOverall('field',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div class="span2">
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">研究概要（一般向け 3分説明バージョン）</div>
             <button class="comment-btn" id="btn-overview" onclick="openCommentModal('overview', '研究概要')">💬 添削</button>
           </div>
-          <div class="editable" contenteditable="true" data-key="research.overview" onblur="saveResearchOverall('overview',this.textContent)"></div>
+          <div class="editable" contenteditable="true" data-key="research.overview"
+               oninput="updateCharCount(this)"
+               onblur="saveResearchOverall('overview',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div>
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">使用技術・手法・環境</div>
             <button class="comment-btn" id="btn-tech" onclick="openCommentModal('tech', '使用技術')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="research.tech" onblur="saveResearchOverall('tech',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.tech"
+               oninput="updateCharCount(this)"
+               onblur="saveResearchOverall('tech',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div>
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">成果・アピールポイント</div>
             <button class="comment-btn" id="btn-result" onclick="openCommentModal('result', '研究成果')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="research.result" onblur="saveResearchOverall('result',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.result"
+               oninput="updateCharCount(this)"
+               onblur="saveResearchOverall('result',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
         <div class="span2">
           <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
             <div class="field-label" style="margin:0;">研究を通じて身についたこと</div>
             <button class="comment-btn" id="btn-learning" onclick="openCommentModal('learning', '研究で得たこと')">💬 添削</button>
           </div>
-          <div class="editable editable-sm" contenteditable="true" data-key="research.learning" onblur="saveResearchOverall('learning',this.textContent)"></div>
+          <div class="editable editable-sm" contenteditable="true" data-key="research.learning"
+               oninput="updateCharCount(this)"
+               onblur="saveResearchOverall('learning',this.textContent)"></div>
+          <span class="char-count">0文字</span>
         </div>
       </div>
       <div style="border-top:1px dashed var(--border); padding-top:16px;">
@@ -427,7 +481,12 @@ select.inline-select { border: 1px solid var(--border); border-radius: 4px; back
     </div>
     <div id="modal-chat-list" style="flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; background:var(--bg);"></div>
     <div style="padding:16px 20px; border-top:1px solid var(--border); background:#fff; border-radius:0 0 12px 12px;">
-      <textarea id="modal-chat-input" placeholder="ここをこう修正してみては？ / こういう意図で書きました など..." style="width:100%; height:70px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:13px; resize:none; outline:none; margin-bottom:10px;"></textarea>
+      <textarea id="modal-chat-input" placeholder="ここをこう修正してみては？ / こういう意図で書きました など..."
+        oninput="updateTextareaCount(this)"
+        style="width:100%; height:70px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:var(--font); font-size:13px; resize:none; outline:none; margin-bottom:4px;"></textarea>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span class="char-count" id="modal-textarea-count" style="margin:0;">0文字</span>
+      </div>
       <div style="display:flex; justify-content:flex-end;">
         <button class="btn btn-primary" onclick="submitComment()" style="padding:8px 24px; font-weight:500;">送信する</button>
       </div>
@@ -449,8 +508,6 @@ let activeCommentTarget = null;
 
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
-// ✅ Fix 1: tableSortMode が未宣言だったため renderTable() で ReferenceError が発生し、
-//           後続の renderCalendar() も実行されず両方とも表示されていなかった
 let tableSortMode = '';
 
 const PHASES = ['未着手','ES作成中','添削待ち','添削完了','ES提出済','書類選考中','一次面接','二次面接','三次面接','四次面接','最終面接','最終面接待ち','内定','不採用'];
@@ -470,6 +527,36 @@ const PHASE_COLORS = {
   '内定':       {bg:'#DCFCE7',text:'#166534',border:'#86EFAC'},
   '不採用':     {bg:'#FEE2E2',text:'#991B1B',border:'#FCA5A5'},
 };
+
+/* ===================================================
+   文字カウンター ユーティリティ
+=================================================== */
+function updateCharCount(el) {
+  const count = el.textContent.replace(/\n$/, '').length;
+  const counter = el.nextElementSibling;
+  if (!counter || !counter.classList.contains('char-count')) return;
+  const limit = el.dataset.limit ? parseInt(el.dataset.limit) : null;
+  counter.textContent = limit ? `${count} / ${limit}文字` : `${count}文字`;
+  counter.classList.remove('warn', 'over');
+  if (limit) {
+    if (count > limit) counter.classList.add('over');
+    else if (count >= limit * 0.9) counter.classList.add('warn');
+  }
+}
+
+function updateTextareaCount(el) {
+  const count = el.value.length;
+  const counterEl = document.getElementById('modal-textarea-count');
+  if (!counterEl) return;
+  counterEl.textContent = `${count}文字`;
+}
+
+function initAllCharCounters() {
+  document.querySelectorAll('.editable[contenteditable]').forEach(el => {
+    updateCharCount(el);
+  });
+}
+/* ===================================================*/
 
 function defaultData() {
   return {
@@ -570,7 +657,6 @@ function getPhaseDate(c) {
   return sched && sched.date ? sched.date : '—';
 }
 
-// ✅ Fix 2: sortTable 関数が定義されていなかったためボタンがエラーになっていた
 function sortTable(mode) {
   tableSortMode = (tableSortMode === mode) ? '' : mode;
   renderTable();
@@ -932,11 +1018,14 @@ function setPhase(phase) {
   renderStepper(); renderStats(); renderTable();
 }
 
+/* renderDynamicQA: 各回答エリアに文字カウンターを追加 */
 function renderDynamicQA(listData, containerId, idPrefix, titlePrefix, type) {
   const html = listData.map((q, i) => {
     const cId = `${idPrefix}_${q.id}`;
     const commentCount = state.comments[cId] ? state.comments[cId].length : 0;
     const btnClass = commentCount > 0 ? "comment-btn has-comments" : "comment-btn";
+    const qLen = (q.q || '').length;
+    const aLen = (q.a || '').length;
     return `
     <div class="es-question" style="position:relative; background: #FAFAF8; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; padding-right: 60px;">
@@ -944,12 +1033,20 @@ function renderDynamicQA(listData, containerId, idPrefix, titlePrefix, type) {
         <button onclick="openCommentModal('${cId}', '${titlePrefix}${i+1}')" class="${btnClass}">💬 添削 ${commentCount > 0 ? `(${commentCount})` : ''}</button>
       </div>
       <button onclick="deleteDynamicQA('${type}', ${i})" class="btn btn-ghost" style="position:absolute; top:12px; right:12px; color:#DC2626; padding:4px 8px; font-size:11px;">🗑 削除</button>
-      <div style="margin-bottom: 12px;">
-        <div class="editable editable-sm" contenteditable="true" onblur="saveDynamicQA('${type}', ${i}, 'q', this.textContent)" data-placeholder="設問を入力...">${q.q}</div>
+      <div style="margin-bottom: 4px;">
+        <div class="editable editable-sm" contenteditable="true"
+             oninput="updateCharCount(this)"
+             onblur="saveDynamicQA('${type}', ${i}, 'q', this.textContent)"
+             data-placeholder="設問を入力...">${q.q}</div>
+        <span class="char-count">${qLen}文字</span>
       </div>
       <div>
         <div style="font-size:11px; font-weight:700; color:var(--text2); margin-bottom:6px;">回答</div>
-        <div class="editable es-answer" contenteditable="true" onblur="saveDynamicQA('${type}', ${i}, 'a', this.textContent)" data-placeholder="回答を入力...">${q.a}</div>
+        <div class="editable es-answer" contenteditable="true"
+             oninput="updateCharCount(this)"
+             onblur="saveDynamicQA('${type}', ${i}, 'a', this.textContent)"
+             data-placeholder="回答を入力...">${q.a}</div>
+        <span class="char-count">${aLen}文字</span>
       </div>
     </div>
   `}).join('');
@@ -978,6 +1075,8 @@ function renderAllTabs() {
   renderDynamicQA(state.selfAnalysis.qa, 'self-qa-list', 'self_qa', '追加設問', 'selfAnalysis');
   renderDynamicQA(state.interview.qa, 'int-qa-list', 'int_qa', 'Q&A', 'interview');
   renderDynamicQA(state.research.qa, 'res-qa-list', 'res_qa', '追加設問', 'research');
+  // 静的エディタの文字カウンターを初期化
+  initAllCharCounters();
 }
 
 function updateCommentBtn(targetId, btnId) {
@@ -1018,11 +1117,17 @@ function saveInterviewReverseQA(val) { state.interview.reverseQA = val; saveStat
 function switchTab(btn, tabId) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+tabId).classList.add('active');
+  // タブ切り替え時にカウンターを更新
+  initAllCharCounters();
 }
 
 function openCommentModal(targetId, title) {
   activeCommentTarget = targetId;
   document.getElementById('modal-title').textContent = title + ' の添削';
+  // モーダルのテキストエリアカウンターをリセット
+  const countEl = document.getElementById('modal-textarea-count');
+  if (countEl) countEl.textContent = '0文字';
+  document.getElementById('modal-chat-input').value = '';
   let currentText = "（テキストがありません）";
   if (targetId.startsWith('es_')) {
     const esId = parseInt(targetId.replace('es_', ''));
@@ -1088,14 +1193,18 @@ function submitComment() {
   }
   if (!state.comments[activeCommentTarget]) state.comments[activeCommentTarget] = [];
   state.comments[activeCommentTarget].push({ id: Date.now(), author: author, text: text, timestamp: Date.now() });
-  inputEl.value = ''; saveState(); renderComments(); renderRecentComments();
+  inputEl.value = '';
+  // 送信後カウンターをリセット
+  const countEl = document.getElementById('modal-textarea-count');
+  if (countEl) countEl.textContent = '0文字';
+  saveState(); renderComments(); renderRecentComments();
 }
 
 function exportData() {
   const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'shukatsu.json'; a.click();
 }
-function importData() { document.getElementById('import-input').click(); }
+function importData() { document.getElementById('import-input')?.click(); }
 
 async function initApp() {
   const isLoggedIn = sessionStorage.getItem('shukatsu_logged_in');
